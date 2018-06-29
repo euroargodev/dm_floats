@@ -1,0 +1,18 @@
+#!/bin/perl -w
+#
+
+foreach $file (@ARGV) {
+	open(INFILE,$file) or die "Error opening $file. $!\n";
+	@lines=<INFILE>;
+        close(INFILE);
+	undef @newlines;
+	foreach $line (@lines) {
+		$line =~ s/Lib_Argo/libargo/;
+		$line =~ s/RWnetcdf.R2008b.//;
+		$line =~ s/Plots.//;
+		push(@newlines,$line);
+	}
+	open(OUTFILE,">$file") or die "Can't open $file for output. $!\n";
+	print OUTFILE @newlines;
+	close(OUTFILE);
+}

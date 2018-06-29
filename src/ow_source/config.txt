@@ -1,0 +1,13 @@
+% MAIN_write_dmqc_files configuration file
+
+%%% IN/OUT DIRECTORY
+%-------------------
+% INPUT NETCDF files DIRECTORY ( Files will be searched in the directory: DIR_FTP/flt_name/profiles/*.nc)
+%DIR_FTP=/export/home1/ccabanes/data/DOI_ARGO/201705-ArgoData/coriolis/ 
+DIR_FTP=/export/home1/ccabanes//tmp/data/float_netcdf/
+
+% SOURCE files for OW software DIRECTORY (output file $float_name$.mat will be put in this directory) 
+DIR_OUT=/export/home1/ccabanes/tmp/data/float_source/
+
+
+
