@@ -162,7 +162,7 @@ if isfield(CHECK,param)
                 case{'OW'}
                     set(p,'FaceColor',[1 0.8 0.8],'FaceAlpha',0.5,'EdgeColor',[0.9 0.9 0.9]);
             end
-            text(xpos,ypos,thecorrection,'interpreter','none')
+            text(double(xpos),double(ypos),thecorrection,'interpreter','none')
         end
         clear xlim ylim
         
