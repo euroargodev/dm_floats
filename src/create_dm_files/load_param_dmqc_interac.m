@@ -16,8 +16,8 @@ institution_code={'AO','BO','CI','CS','GE','GT','HZ','IF','IN','JA','JM','KM','K
 institution_name={'AOML, USA','BODC, United Kingdom','IOS, Canada','CSIRO, Australia', 'BSH, Germany','GTS : used for data coming from WMO GTS network','CSIO, China','Ifremer, France','INCOIS, India','JMA, Japan','Jamstec, Japan','KMA, Korea','KORDI, Korea','MBARI, USA','MEDS, Canada','NAVO, USA','NMDIS, China','PMEL, USA','Russia','SIO, Scripps, USA','Spain','UW, USA','Far Eastern Regional Hydrometeorological Research Institute of Vladivostock, Russia','WHOI, USA'};
 
 [isw,tf] = listdlg('PromptString','Institution performing DM?:',...
-        'SelectionMode','single',...
-        'ListString',institution_name,'InitialValue',8,'ListSize',[250,400]);
+    'SelectionMode','single',...
+    'ListString',institution_name,'InitialValue',8,'ListSize',[250,400]);
 s.INSTITUTION=institution_code{isw};
 
 % correction choice
@@ -198,43 +198,43 @@ while iswc==2
     isw = questdlg('ERROR on PSAL_ADJUSTED ?','SET PSAL_ADJUSTED UNCERTAINTIES', 'MAX[1*OW,INSTRUMENT UNCERTAINTY]', 'PI_UNCERTAINTY','HELP','MAX[1*OW,INSTRUMENT UNCERTAINTY]' );
     
     switch isw
-    case {'MAX[1*OW,INSTRUMENT UNCERTAINTY]'}
-        prompt={['INSTRUMENT UNCERTAINTY ?'] };
-        
-        dlg_title =  ['MAX[1*OW,INSTRUMENT UNCERTAINTY]'];
-        
-        num_lines = 1;
-        def = {num2str(0.01)};
-        
-        answer = inputdlg(prompt,dlg_title,num_lines,def,options);
-        if isempty(answer)==0
-            s.SAL_INST_UNCERTAINTY = str2num(answer{1});
-            s.PSAL_ERROR='MAX_OW_INST';
-            iswc=1;
-        end
-    case {'PI_UNCERTAINTY'}
-        prompt={['PI UNCERTAINTY ?'] };
-        
-        dlg_title =  ['ERROR on PSAL is PI_UNCERTAINTY'];
-        
-        num_lines = 1;
-        def = {num2str(0.01)};
-        
-        answer = inputdlg(prompt,dlg_title,num_lines,def,options);
-        if isempty(answer)==0
-            s.SAL_PI_UNCERTAINTY = str2num(answer{1});
-            s.PSAL_ERROR = 'FROM_PI';
-            iswc=1;
-        end
-    case {'HELP'}
-        h=helpdlg({'It is possible to choose',...
-    '1) PSAL_ADJUSTED_ERROR = max(OW err, INST_UNCERTAINTY)',...
-    'or 2) PSAL_ADJUSTED_ERROR = PI_UNCERTAINTY',...
-    'if 1),  INST_UNCERTAINTY = 0.01 PSU by default.',...
-    'Note: if, for a given cycle, PSAL_ADJUSTED QC is >=2 or',...
-    'if |PSAL_ADJUSTED -PSAL|>0.05 PSU then ',...
-    'PSAL_ADJUSTED_ERROR = max(PSAL_ADJUSTED_ERROR,0.016)'}); 
-    uiwait(h)
+        case {'MAX[1*OW,INSTRUMENT UNCERTAINTY]'}
+            prompt={['INSTRUMENT UNCERTAINTY ?'] };
+            
+            dlg_title =  ['MAX[1*OW,INSTRUMENT UNCERTAINTY]'];
+            
+            num_lines = 1;
+            def = {num2str(0.01)};
+            
+            answer = inputdlg(prompt,dlg_title,num_lines,def,options);
+            if isempty(answer)==0
+                s.SAL_INST_UNCERTAINTY = str2num(answer{1});
+                s.PSAL_ERROR='MAX_OW_INST';
+                iswc=1;
+            end
+        case {'PI_UNCERTAINTY'}
+            prompt={['PI UNCERTAINTY ?'] };
+            
+            dlg_title =  ['ERROR on PSAL is PI_UNCERTAINTY'];
+            
+            num_lines = 1;
+            def = {num2str(0.01)};
+            
+            answer = inputdlg(prompt,dlg_title,num_lines,def,options);
+            if isempty(answer)==0
+                s.SAL_PI_UNCERTAINTY = str2num(answer{1});
+                s.PSAL_ERROR = 'FROM_PI';
+                iswc=1;
+            end
+        case {'HELP'}
+            h=helpdlg({'It is possible to choose',...
+                '1) PSAL_ADJUSTED_ERROR = max(OW err, INST_UNCERTAINTY)',...
+                'or 2) PSAL_ADJUSTED_ERROR = PI_UNCERTAINTY',...
+                'if 1),  INST_UNCERTAINTY = 0.01 PSU by default.',...
+                'Note: if, for a given cycle, PSAL_ADJUSTED QC is >=2 or',...
+                'if |PSAL_ADJUSTED -PSAL|>0.05 PSU then ',...
+                'PSAL_ADJUSTED_ERROR = max(PSAL_ADJUSTED_ERROR,0.016)'});
+            uiwait(h)
     end
     
 end
@@ -248,7 +248,7 @@ end
 choiceishelp=1;
 while choiceishelp==1
     choice = questdlg('How do you want to store calibration information','SCIENTIFIC CALIBRATION SECTION', 'N_CALIB=1', 'N_CALIB=N_CALIB+1','HELP','N_CALIB=1');
-   
+    
     switch choice
         case{'N_CALIB=1'}
             choiceishelp=0;
@@ -256,12 +256,13 @@ while choiceishelp==1
         case{'N_CALIB=N_CALIB+1'}
             choiceishelp=0;
             s.ADD_NCALIB=1;
-
+            
         case{'HELP'}
             h=helpdlg({'N_CALIB is a dimension used in the SCIENTIFIC CALIBRATION variables',...
                 'This corresponds to the maximum number of calibration performed on a profile:', ...
-                '* if N_CALIB=1, the details of all steps in PSAL adjustement (press adjutement effect', ...
-                'thermal lag, OW adjustement) are described in a single calibration comment', ...
+                '* if N_CALIB=1, all previous calibration comments will be erased, the details', ...
+                ' of all steps in PSAL adjustement (press adjutement effect', ...
+                'thermal lag, OW adjustement) have to be described in a single calibration comment', ...
                 '* if N_CALIB=N_CALIB+1 the OW step will result in an additional calibration comment'});
             uiwait(h)
     end
@@ -270,14 +271,17 @@ end
 
 s.ADD_NCALIB
 
-choice = questdlg('Has salinity previously adjusted for thermal mass effect?','THERMAL MASS ADJUSTEMENT', 'NO', 'YES','NO');
+choiceishelp=1;
+while choiceishelp==1
+    choice = questdlg('Has salinity previously adjusted for thermal mass effect?','THERMAL MASS ADJUSTEMENT', 'NO', 'YES','HELP','NO');
     
-switch choice
+    switch choice
         case{'YES'}
             s.THERM=1;
             s.force='adjusted';
             f=warndlg('Input for salinity calibration are: TEMP_ADJUSTED, PSAL_ADJUSTED and PRES_ADJUSTED');
             uiwait(f)
+            
             if s.ADD_NCALIB==0 % CTM equation and coefficient will be added in the SCIENTIFIC CALIB EQUATION and COEFFICIENT FOR PSAL
                 dlg_title =  ['Coefficients for CTM correction:'];
                 clear prompt1 def
@@ -295,10 +299,23 @@ switch choice
                 s.CTM_coefficient=['CTM alpha= ' answer{1} ' & tau= ' answer{2} ', rise rate=' answer{3} ' with error equal to the correction. '];
                 s.CTM_equation=[', corrected for CTM, ' answer{4}];
             end
+            choiceishelp=0;
         case{'NO'}
-        s.THERM=0;
+            s.THERM=0;
+            choiceishelp=0;
+        case{'HELP'}
+            h=helpdlg({'if YES: the program will apply OW calibration on PSAL_ADJUSTED:',...
+                '       input_temp is TEMP_ADJUSTED,',...
+                '       input_pres is PRES_ADJUSTED,',...
+                '       input_psal is PSAL_ADJUSTED',...
+                'if NO: input_temp is TEMP, ',...
+                '       input_pres is PRES or PRES_ADJUSTED if PRES was ADJUSTED before,',...
+                '       input_psal is PSAL or PSAL recalculated to take into account',...
+                '       effects of pressure adjustement'});
+            uiwait(h)
+            
+    end
 end
-
 
 iswc=2;
 
@@ -311,9 +328,9 @@ while iswc==2
     
     num_lines = 1;
     NCONFIG='';
-%      if strcmp(NCONFIG,'39')|strcmp(NCONFIG,'392')
-%          BASEREF='CTD2016V1';
-%      end
+    %      if strcmp(NCONFIG,'39')|strcmp(NCONFIG,'392')
+    %          BASEREF='CTD2016V1';
+    %      end
     NCONFIG_str=['config  ' strtrim(NCONFIG)];
     
     def = {'OW Method'; CONFIG.VERSION; ''; CONFIG.BASEREF; ''};
@@ -328,7 +345,7 @@ while iswc==2
         iswc=1;
     end
 end
-   
+
 
 % to be included in PSAL calibration comment
 % SCIENTIFIC_CALIB_COMMENT = [s.CORR_PSAL_comment_XX s.ERROR_PSAL_comment_XX s.METHOD s.REPPORT];
@@ -354,7 +371,7 @@ VEC=[FLd.cycle_number.data(1)-1,s.APPLY_upto_CY];
 
 for lk=1:length(VEC)-1
     thecorrection=s.CORRECTION{lk};
-
+    
     dlg_title =  ['Cycles ' num2str(VEC(lk)+1) ' - ' num2str(VEC(lk+1)) ': SCIENTIFIC_CALIB_COMMENT FOR PSAL_ADJUSTED'];
     clear prompt1 def
     prompt1{1} = ['CORR_PSAL_ADJUSTED_comment (' thecorrection ' CORRECTION is applied)'] ;
@@ -376,7 +393,7 @@ for lk=1:length(VEC)-1
     else
         error('You should run the program again')
     end
-
+    
 end
 
 % for the conductivity CNDC: same comment as PSAL but the word "salinity" is replaced by the word "conductivity".
@@ -386,8 +403,8 @@ end
 % to be included in TEMP calibration comment
 % SCIENTIFIC_CALIB_COMMENT = [s.CORR_TEMP_comment]
 if s.ADD_NCALIB==0;
-%  iswc=2;
-%  while iswc==2
+    %  iswc=2;
+    %  while iswc==2
     
     dlg_title =  ['SCIENTIFIC_CALIB_COMMENT FOR TEMP_ADJUSTED         '];
     clear prompt1 def
@@ -398,19 +415,19 @@ if s.ADD_NCALIB==0;
     def{2} = 'Calibration error is manufacturer specified accuracy';
     
     num_lines = 1;
-%      answer = inputdlg(prompt1,dlg_title,num_lines,def,options);
-%      if isempty(answer)==0
-%          s.CORR_TEMP_comment=[answer{1} answer{2}];
-           s.CORR_TEMP_comment=[def{1} def{2}];
-%          iswc=1;
-%      end
-%  end
+    %      answer = inputdlg(prompt1,dlg_title,num_lines,def,options);
+    %      if isempty(answer)==0
+    %          s.CORR_TEMP_comment=[answer{1} answer{2}];
+    s.CORR_TEMP_comment=[def{1} def{2}];
+    %          iswc=1;
+    %      end
+    %  end
 end
 % to be included in PRES calibration comment (unless a calibration of the PRESSURE has already been done!!)
 % SCIENTIFIC_CALIB_COMMENT = [s.CORR_PRES_comment]
 if s.ADD_NCALIB==0;
-%  iswc=2;
-%  while iswc==2
+    %  iswc=2;
+    %  while iswc==2
     
     dlg_title =  ['SCIENTIFIC_CALIB_COMMENT FOR PRES ADJUSTED         '];
     clear prompt1 def
@@ -423,25 +440,25 @@ if s.ADD_NCALIB==0;
     num_lines = 1;
     %answer = inputdlg(prompt1,dlg_title,num_lines,def,options);
     %if isempty(answer)==0
-        %s.CORR_PRES_comment=[answer{1} answer{2}];
-        s.CORR_PRES_comment=[def{1} def{2}];
-        %iswc=1;
+    %s.CORR_PRES_comment=[answer{1} answer{2}];
+    s.CORR_PRES_comment=[def{1} def{2}];
+    %iswc=1;
     %end
-%  end
+    %  end
 end
 %  s.CORR_DOXY_comment=[];
-%  
+%
 %  if sum(ismember(cellstr(theparamd),'DOXY'))>0|sum(ismember(cellstr(theparame),'DOXY'))>0
 %      iswc=2;
 %      while iswc==2
-%          
+%
 %          dlg_title =  ['SCIENTIFIC_CALIB_COMMENT FOR DOXY          '];
 %          clear prompt1 def
 %          prompt1{1} = ['CORR_DOXY_comment (if a calibration of the DOXY has already been done the original comment is kept!!)' ] ;
-%          
+%
 %          def{1} = 'Delayed mode qc on DOXY is not yet available -';
-%          
-%          
+%
+%
 %          num_lines = 1;
 %          answer = inputdlg(prompt1,dlg_title,num_lines,def,options);
 %          if isempty(answer)==0
@@ -449,7 +466,7 @@ end
 %              iswc=1;
 %          end
 %      end
-%      
+%
 %  else
 %      s.CORR_DOXY_comment='Delayed mode qc on DOXY is not yet available -';
 %  end
