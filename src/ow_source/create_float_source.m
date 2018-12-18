@@ -45,22 +45,22 @@
 %  tested with matlab  8.3.0.532 (R2014a)
 %
 %  EXTERNAL LIB
-%  package +libargo:  addpath('dm_float/lib/')
-%  seawater:  addpath('dm_float/lib/seawater_330_its90/')
+%  package +libargo:  addpath('../../../dm_floats/lib/')
+%  seawater:  addpath('../../../dm_floats/lib/seawater_330_its90/')
 %
 %  CONFIGURATION file: config.txt;
 %==================================================
 
 function create_float_source(flt_name, varargin )
 
-n=length(varargin)
+n=length(varargin);
 
 if n/2~=floor(n/2)
     error('check the imput arguments')
 end
 
-f=varargin(1:2:end)
-c=varargin(2:2:end)
+f=varargin(1:2:end);
+c=varargin(2:2:end);
 s = cell2struct(c,f,2);
 
 if ischar(flt_name)==0
@@ -322,7 +322,7 @@ else
     %---------------------------------------------------------------
     % PUT DATE IN THE RIGHT FORMAT (decimal year)
     
-    date_greg   = greg_0h(jul+jul_0h(1950,01,01));
+    date_greg   = libargo.greg_0h(jul+libargo.jul_0h(1950,01,01));
     dates_str   = [];
     [d1 d2]     = size(date_greg);
     for j=1:d1;
