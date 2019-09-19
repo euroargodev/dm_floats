@@ -186,21 +186,32 @@ else
     %keyboard
     FLm=[];
     DIMm=[];
+    isreduced=1; %max one level every 10db, if 0 keep the original vertical sampling
     for k=1:length(core_Asc_files)
         
         [FL,DIM,Globatt] = libargo.read_netcdf_allthefile([root_in   core_Asc_files{k}],Param);
         
         if  DIM.n_prof.dimlength>1
             is_primary=libargo.findstr_tab(FL.vertical_sampling_scheme.data,'Primary sampling');
+            if sum(is_primary)>1
+            warning(['Float ' core_Asc_files{k} 'more than one primary sampling!!']) % found one case. It is now corrected
+            is_primary=is_primary(1);
+            end
             [FL,DIM] = libargo.extract_profile_dim(FL,DIM,'N_PROF',is_primary);
         end
         
-        if DIM.n_levels.dimlength>300 %(high vertical sampling -> reduce 1 level every 10db)
-            
+        %if DIM.n_levels.dimlength>300 %  23/08/2019 this condition is
+        %removed since it can sometimes result in data gap when all
+        %pressure measurements are put at the same index levels (see line
+        %437 of this code)
+        %keyboard
+       if isreduced==1   
             Fi=libargo.replace_fill_bynan(FL);
-            thepres=round(Fi.pres.data/10);
-            [up,ip]=unique(thepres);
-            display(['high sampling: reduce N_LEVELS (' num2str(DIM.n_levels.dimlength) ' to ' num2str(length(ip)) ')'])
+            thepres=floor(Fi.pres.data/10);     % 23/08/2019 max one level every 10db (floor instead of round => less gaps)
+           [up,ip]=unique(thepres,'legacy');    % 23/08/2019 'legacy': take the deepest level on the 10db layer
+            if length(up)< length(thepres)
+            display(['Reduce vertical sampling - max 1 level every 10db -(' num2str(DIM.n_levels.dimlength) ' to ' num2str(length(ip)) ')'])
+            end
             [FL,DIM] = libargo.extract_profile_dim(FL,DIM,'N_LEVELS',ip);
             FL = libargo.check_FirstDimArray_is(FL,'N_PROF');
         end
@@ -496,7 +507,6 @@ else
     %---------------------------------------------------------------
     % WRITE MAT FILE
     
-    %keyboard
     
     save(mat_filename,'DATES','LAT','LONG','PRES','TEMP','SAL','PTMP','PROFILE_NO')
 end
