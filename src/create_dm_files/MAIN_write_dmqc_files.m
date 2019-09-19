@@ -58,7 +58,7 @@ else
 flotteur = strtrim(flt_name);
 end
 
-DIR_CAL=[DIR_OW 'CAL/'  ];
+DIR_CAL=[DIR_OW 'float_calib/'  ];
 
 C_FILE = load([DIR_CAL num2str(flotteur) '/cal_' num2str(flotteur) '.mat']);
 
