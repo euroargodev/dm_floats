@@ -332,32 +332,37 @@ else
     
     %---------------------------------------------------------------
     % PUT DATE IN THE RIGHT FORMAT (decimal year)
+    % cc 26/09/2019 corrected to deal with dates that can be FillValue 
+    
+    fillvalue = FLm.juld.FillValue_;
     
     date_greg   = libargo.greg_0h(jul+libargo.jul_0h(1950,01,01));
+    date_greg (jul==fillvalue)= NaN; %cc 
     dates_str   = [];
     [d1 d2]     = size(date_greg);
+    dates=NaN.*ones(d1,1);
+
     for j=1:d1;
-        dates_st = [num2str(date_greg(j,1)) num2str(datestr(date_greg(j,:),5)) num2str(datestr(date_greg(j,:),7)) num2str(datestr(date_greg(j,:),'HH')) num2str(datestr(date_greg(j,:),'MM')) num2str(datestr(date_greg(j,:),'SS'))];
-        dates_str = [dates_str ; dates_st];
-    end;
-    
-    [s1 s2]=size(dates_str);
-    
-    dates=NaN.*ones(s1,1);
-    
-    for i=1:s1
-        if(isnan(dates_str(i))==0)
-            yr    = str2num(dates_str(i,1:4));
-            mo    = str2num(dates_str(i,5:6));
-            day   = str2num(dates_str(i,7:8));
-            hr    = str2num(dates_str(i,9:10));
-            minut = str2num(dates_str(i,11:12));
+        if(isnan(date_greg(j,:))==0)
+            %dates_str = [num2str(date_greg(j,1)) num2str(datestr(date_greg(j,:),5)) num2str(datestr(date_greg(j,:),7)) num2str(datestr(date_greg(j,:),'HH')) num2str(datestr(date_greg(j,:),'MM')) num2str(datestr(date_greg(j,:),'SS'))];
+            dates_str =datestr(date_greg(j,:),'yyyymmddHHMMSS');
+            % dates_str = [dates_str ; dates_st];
+            
+            
+            yr    = str2num(dates_str(1:4));
+            mo    = str2num(dates_str(5:6));
+            day   = str2num(dates_str(7:8));
+            hr    = str2num(dates_str(9:10));
+            minut = str2num(dates_str(11:12));
             if(mo<1|mo>12|day<1|day>31)
-                dates(i)=yr;
+                dates(j)=yr;
             else
-                dates(i)=yr+libargo.cal2dec(mo,day,hr,minut)./365;
+                dates(j)=yr+libargo.cal2dec(mo,day,hr,minut)./365;
             end
+        else
+            dates(j)=NaN;
         end
+        
     end
     
     %---------------------------------------------------------------------------
