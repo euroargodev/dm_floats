@@ -35,8 +35,8 @@
 %       Extra spaces & Bad data with NaN
 % -----------------------------------
 %   HISTORY
-% 04/12/2006   : C.Coatanoan: - creation
-% 21/06/2007   : N.David   : - Add Selection of float, Pb of downward profile
+%  04/12/2006   : C.Coatanoan: - creation
+%  21/06/2007   : N.David   : - Add Selection of float, Pb of downward profile
 %  07/2009 : C.Lagadec : - use of matlab 2009 for reading netcdf files
 %  07/2015 : C.Cabanes : - read mono-cycle files/use of libargo tools/reduce high vertical sampling
 %  04/2018 : C.Cabanes : - possibility to downmoad data from ftp.ifremer.fr (wget call)
@@ -295,7 +295,7 @@ else
         end
             disp(' ')
     end
-    %keyboard
+    
     %i=find(PRESINI==2047);
     %    if length(i) > 1
     %         PRESINI(i(2)) = 2050;
@@ -418,16 +418,23 @@ else
     qc = zeros(size(TEMPINI));
     
     for I = 1:length(TEMPINI(:))
-        if ( str2num(pres_qc(I)) < 3 & str2num(temp_qc(I)) < 4 & str2num(psal_qc(I)) < 4 )
+        if ( str2num(pres_qc(I)) ~= 3 & str2num(pres_qc(I)) ~= 4 & str2num(temp_qc(I)) ~= 4 & str2num(psal_qc(I)) ~= 4 )
             qc(I) = 1;
         end
     end
+   
     
     % Exclude dummies
     I = find( SALINI  > 50  | SALINI  <   0 | ...
         PTMPINI > 50  | PTMPINI < -10 | ...
         PRESINI >6000 | PRESINI <   0);
     qc(I) = 0;
+    
+    if sum(sum(qc==1))==0 % all data have been discarded
+        warning('All data have been discarded because either PSAL_QC  or TEMP_QC is filled with 4 or PRES_QC is filled with 3 or 4')
+        disp('NO SOURCE FILE WILL BE GENERATED !!!')
+        return
+    end
     
     for J = 1:length(qc(:));
         if qc(J)==0;
@@ -451,6 +458,7 @@ else
             tabnpt(J)=indlev;
         end
     end
+    
     
     [indlevmax,cyclevmax]=max(tabnpt);
     
