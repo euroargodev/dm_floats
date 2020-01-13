@@ -1350,6 +1350,10 @@ for i=1:length(therep)  % WORK ON EACH FILE
                % keyboard
                 FLD = libargo.replace_nan_byfill(FLD);
                 
+                if isfield(C,'OPERATOR_NAME')&&isfield(C,'OPERATOR_ORCID_ID')&&isfield(C,'OPERATOR_INSTITUTION')
+                GlobattD.comment_dmqc_operator.att = ['PRIMARY | ' strtrim(C.OPERATOR_ORCID_ID) ' | ' strtrim(C.OPERATOR_NAME) ', ' strtrim(C.OPERATOR_INSTITUTION) ];
+                GlobattD.comment_dmqc_operator.name = 'comment_dmqc_operator';
+                end
                 libargo.create_netcdf_allthefile(FLD,DIMD,[root_out file_out],GlobattD);
                 
                 

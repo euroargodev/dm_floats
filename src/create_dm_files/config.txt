@@ -16,5 +16,12 @@ DIR_OUT=/export/home1/ccabanes/data/DM_FILES/coriolis/
 
 %%% INFORMATIONS ON OW METHOD  (default values used in calibration comments)
 %----------------------------
-VERSION=1.1
-BASEREF=CTD2018V01 & ARGO2018V01
+VERSION=2.1.0
+BASEREF=CTD2019V01 & ARGO2019V03
+
+
+%%% INFORMATIONS ON  DMQC OPERATOR (to be written in global attributes :comment_dmqc_operator = "PRIMARY | OPERATOR_ORCID_ID | OPERATOR_NAME, OPERATOR_INSTITUTION") ;
+%---------------------------------
+OPERATOR_ORCID_ID=https://orcid.org/xxxx-xxxx-xxxx-xxxx
+OPERATOR_NAME=MyName
+OPERATOR_INSTITUTION=MyInstitution
