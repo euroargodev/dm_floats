@@ -12,16 +12,20 @@ if isfield(CHECK,param)
     else
         CHECK.(param).n_correction = libargo.libargo.sd_round(CHECK.(param).n_correction,2);
     end
-    
     figure
+    %hf= figure;
+    %initpos = get(hf,'Position') ;
+    %set(hf,'Position', [initpos(1)   initpos(2)-(initpos(4)*0.9)   initpos(3)*1.1   initpos(4)*1.8]) ;
     %---------------------------------------------------
     subplot(4,1,1)
-    plot( CHECK.n_cycle_for_plot, CHECK.(param).n_correction,'-+');
+    %set(gca,'Fontsize',12)
+    %set(gca,'FontWeight','bold')
     hold on
     grid on
+    plot( CHECK.n_cycle_for_plot, CHECK.(param).n_correction,'-+');
     
     
-    title([float_number ': correction  for ' upper(param) '(' param '_adjusted - ' param ') in the netcdf file'],'interpreter', 'none')
+    title([float_number ': Mean ' upper(param) ' CORRECTION (' param '_adjusted - ' param ') in the netcdf file'],'interpreter', 'none')
     xlabel('n_cycle','interpreter','none')
     ylabel([ param ' units'])
     
@@ -45,15 +49,17 @@ if isfield(CHECK,param)
             ylim1(1)=-1;
             ylim1(2)=1;
     end
-    %keyboard
     axis([xlim1(1) xlim1(2) ylim1(1) ylim1(2)])
     
     %---------------------------------------------------
     subplot(4,1,2)
+     %set(gca,'Fontsize',12)
+    %set(gca,'FontWeight','bold')
     hold on
     box on
-    w(:,:)=[0,0,0;0.3,1,0.3;1,1,0.3;1,0.7,0.3;1,0.3,0.3];
-    CHECK.(param).adjqc(CHECK.(param).adjqc==99)=0;
+    w(:,:)=[1,1,1;0,0,1;0.3,1,0.3;1,1,0.3;1,0.7,0.3;1,0.3,0.3];
+   % w(:,:)=[0,0,0;0.3,1,0.3;1,1,0.3;1,0.7,0.3;1,0.3,0.3];
+    CHECK.(param).adjqc(CHECK.(param).adjqc==99)=-1;
     
     %keyboard
     a=[CHECK.n_cycle_for_plot,CHECK.n_cycle_for_plot(end)+1];
@@ -62,37 +68,45 @@ if isfield(CHECK,param)
     pcolor(a,[1:size(CHECK.(param).adjqc,2)],b')
     set(gca,'YDir','reverse')
     shading('flat')
-    ylabel('level')
+    ylabel('level #')
     xlabel('n_cycle','interpreter','none')
     title([upper(param) '_ADJUSTED_QC  in the netcdf file'],'interpreter', 'none')
     
-    colormap(w)
-    caxis([-0.5 4.5])
-    axis([xlim(1) xlim(2)+0.5 0 size(CHECK.(param).qc,2)])
     
+    colormap(w)
+    caxis([-1.5 4.5])
+    yymax=max(find(sum(isnan(CHECK.(param).adjqc))==size(CHECK.(param).adjqc,1)==0));
+    axis([xlim(1) xlim(2)+0.5 0 yymax+5])
+    %keyboard
     %---------------------------------------------------
     subplot(4,1,3)
+    %set(gca,'Fontsize',12)
+    %set(gca,'FontWeight','bold')
     hold on
     box on
-    w(:,:)=[0,0,0;0.3,1,0.3;1,1,0.3;1,0.7,0.3;1,0.3,0.3];
-    CHECK.(param).qc(CHECK.(param).qc==99)=0;
+    %w(:,:)=[0,0,0;0.3,1,0.3;1,1,0.3;1,0.7,0.3;1,0.3,0.3];
+    w(:,:)=[1,1,1;0,0,1;0.3,1,0.3;1,1,0.3;1,0.7,0.3;1,0.3,0.3];
+    CHECK.(param).qc(CHECK.(param).qc==99)=-1;
     a=[CHECK.n_cycle_for_plot,CHECK.n_cycle_for_plot(end)+1];
     b=double([CHECK.(param).qc;CHECK.(param).qc(end,:)]);
     %pcolor([1:size(CHECK.(param).adjqc,1)],[1:size(CHECK.(param).adjqc,2)],double(CHECK.(param).adjqc'))
     pcolor(a,[1:size(CHECK.(param).qc,2)],b')
     set(gca,'YDir','reverse')
     shading('flat')
-    ylabel('level')
+    ylabel('level #')
     xlabel('n_cycle','interpreter','none')
     title([upper(param) '_QC  in the netcdf file'],'interpreter', 'none')
     
     colormap(w)
-    caxis([-0.5 4.5])
-    axis([xlim(1) xlim(2)+0.5 0 size(CHECK.(param).qc,2)])
+    caxis([-1.5 4.5])
+    yymax=max(find(sum(isnan(CHECK.(param).qc))==size(CHECK.(param).qc,1)==0));
+    axis([xlim(1) xlim(2)+0.5 0 yymax+5])
     
     
     %---------------------------------------------------
     subplot(4,1,4)
+    %set(gca,'Fontsize',12)
+    %set(gca,'FontWeight','bold')
     %keyboard
     hold on
     plot( CHECK.n_cycle_for_plot, CHECK.(param).adj_err,'-+r');
@@ -124,8 +138,9 @@ if isfield(CHECK,param)
     %  linkaxes([h1 h2], 'x');
     %
     %  xlim=get(h2,'XLim');
-    title([upper(param) '_ADJUSTED_ERROR  in the netcdf file'],'interpreter', 'none')
-    
+   % title([upper(param) '_ADJUSTED_ERROR  in the netcdf file'],'interpreter', 'none')
+    title(['Mean ' upper(param) '_ADJUSTED_ERROR  in the netcdf file'],'interpreter', 'none')
+
     grid on
     box on
     ylabel([ param ' units'])

@@ -101,7 +101,7 @@ while iswc==2
                         switch iswc
                             case{'OK'}
                                 s.CORRECTION = {'NO';'OW';'NO'};
-                                s.APPLY_upto_CY = [str2num(answer{2}),max(C_FILE.PROFILE_NO)];
+                                s.APPLY_upto_CY = [str2num(answer{1}) str2num(answer{2}),max(C_FILE.PROFILE_NO)];
                                 stopasking=1;
                         end
                     end
@@ -333,7 +333,7 @@ while iswc==2
     %      end
     NCONFIG_str=['config  ' strtrim(NCONFIG)];
     
-    def = {'OW Method'; CONFIG.VERSION; ''; CONFIG.BASEREF; ''};
+    def = {'OWC Method'; CONFIG.VERSION; ''; CONFIG.BASEREF; ''};
     
     answer = inputdlg(prompt,dlg_title,num_lines,def,options);
     
@@ -357,7 +357,7 @@ s.CORR_PSAL_comment.NO = ['No adjustement was necessary. '];
 
 s.CORR_PSAL_comment.LAUNCH_OFFSET =['An offset was detected by comparing float data with the reference CTD cast made at float launch. This offset of ' num2str(s.LAUNCH_OFFSET) ' PSU was added . '];
 %s.CORR_PSAL_comment.LAUNCH_OFFSET =['An offset was detected before launch and was confirmed by comparing data from other closest floats. This offset of ' num2str(s.LAUNCH_OFFSET) ' PSU was added . '];
-s.CORR_PSAL_comment.OW = ['Salinity drift or offset detected - OW fit is adopted. '];
+s.CORR_PSAL_comment.OW = ['Salinity drift or offset detected - OWC fit is adopted. '];
 
 
 s.ERROR_PSAL_comment.MAX_OW_INST = ['Error = maximum [statistical uncertainty, ' num2str(s.SAL_INST_UNCERTAINTY) ']. '];

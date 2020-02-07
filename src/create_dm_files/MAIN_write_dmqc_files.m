@@ -350,13 +350,14 @@ for i=1:length(therep)  % WORK ON EACH FILE
                         FLD.pres_adjusted_qc.data(n_prof,:) = FLD.pres_qc.data(n_prof,:);
                         
                         inst_type = strtrim(FLD.wmo_inst_type.data(n_prof,:));
-                        if ismember(inst_type,{'841','843','844','846','851','853','856','860','831','838'}) % SBE
-                            the_error = 2.4;
-                        elseif ismember (inst_type,{'842','847','852','857','861'}) % FSI
+                        %if ismember(inst_type,{'841','843','844','846','851','853','856','860','831','838'}) % SBE
+                        the_error = 2.4;
+                        %elseif ismember (inst_type,{'842','847','852','857','861'}) % FSI
+                        if ismember (inst_type,{'842','847','852','857','861'}) % FSI
                             the_error = 5;
-                        else
-                            disp('Unknwon WMO_INST_TYPE')
-                            the_error =  5 ;
+                       % else
+                            %disp('Unknown WMO_INST_TYPE')
+                            %the_error =  5 ;
                         end
                         
                         FLD=libargo.replace_nan_byfill(FLD); % ajout le 12/04/2016
@@ -410,13 +411,14 @@ for i=1:length(therep)  % WORK ON EACH FILE
                     FLD.temp_adjusted_qc.data(n_prof,:) = FLD.temp_qc.data(n_prof,:);
                     
                     inst_type = strtrim(FLD.wmo_inst_type.data(n_prof,:));
-                    if ismember (inst_type,{'841','843','844','846','851','853','856','860','831','838'}) % SBE
+                    %if ismember (inst_type,{'841','843','844','846','851','853','856','860','831','838'}) % SBE
                         the_error =0.002;
-                    elseif ismember (inst_type,{'842','847','852','857','861'}) % FSI
+                    %elseif ismember (inst_type,{'842','847','852','857','861'}) % FSI
+                    if ismember (inst_type,{'842','847','852','857','861'}) % FSI
                         the_error = 0.01;
-                    else
-                        disp('Unknwon WMO_INST_TYPE')
-                        the_error =  0.01 ;
+                    %else
+                        %disp('Unknown WMO_INST_TYPE')
+                        %the_error =  0.01 ;
                     end
                     FLD.temp_adjusted_error.data(n_prof,:) = the_error;
                     
@@ -658,13 +660,14 @@ for i=1:length(therep)  % WORK ON EACH FILE
                     test=check_isfillval_prof(FLD,'cndc');
                     if test.cndc==0;
                         inst_type = strtrim(FLD.wmo_inst_type.data(n_prof,:));
-                        if ismember(inst_type,{'841','843','844','846','851','853','856','860','831','838'}) % SBE
+                        %if ismember(inst_type,{'841','843','844','846','851','853','856','860','831','838'}) % SBE
                             the_error = 0.005; % mS/cm
-                        elseif ismember (inst_type,{'842','847','852','857','861'}) % FSI
+                        %elseif ismember (inst_type,{'842','847','852','857','861'}) % FSI
+                        if ismember (inst_type,{'842','847','852','857','861'}) % FSI   
                             the_error = 0.01; % mS/cm
-                        else
-                            disp('Unknwon WMO_INST_TYPE')
-                            the_error =  0.01; %mS/cm
+                       % else
+                        %    disp('Unknown WMO_INST_TYPE')
+                        %    the_error =  0.01; %mS/cm
                         end
                         
                         % remplit le champs CNDC adjusted de façon cohérente avec psal_adjusted, temp_adjusted, et pres_adjusted
@@ -1308,7 +1311,12 @@ for i=1:length(therep)  % WORK ON EACH FILE
                 l_so=length(soft);
                 FLD.history_software.data(new_hist,n_prof,1:l_so)=soft;
                 
-                soft_release=s.OW_RELEASE;
+                if length(s.OW_RELEASE)>4
+                 warning('OW VERSION is truncated to 4 characters in HISTORY_SOFTWARE_RELEASE')
+                soft_release=s.OW_RELEASE(1:4);
+                else
+                 soft_release=s.OW_RELEASE;
+                end
                 l_so_r=length(soft_release);
                 FLD.history_software_release.data(new_hist,n_prof,1:l_so_r)=soft_release;
                 
@@ -1358,7 +1366,8 @@ for i=1:length(therep)  % WORK ON EACH FILE
                 
                 
                 % Save some variables to make plots for checking what was done
-                
+                FLD = libargo.format_flags_char2num(FLD); % modif cc 07/02/2020
+                FL = libargo.format_flags_char2num(FL);   % modif cc 07/02/2020
                 FLD = libargo.replace_fill_bynan(FLD);
                 FL = libargo.replace_fill_bynan(FL);
                 
@@ -1392,7 +1401,7 @@ for i=1:length(therep)  % WORK ON EACH FILE
                         CHECK.(param).adj_err(i) = libargo.meanoutnan(FLD.([param '_adjusted_error']).data(n_prof,:));
                         CHECK.(param).raw(i) = libargo.meanoutnan(FLD.(param).data(n_prof,:));
                         
-                        FLD = libargo.format_flags_char2num(FLD);
+                        %FLD = libargo.format_flags_char2num(FLD);
                         
                         the_qc = FLD.([param '_adjusted_qc']).data(n_prof,:);
                         the_qc(the_qc==0)=99;
@@ -1422,7 +1431,7 @@ for i=1:length(therep)  % WORK ON EACH FILE
                         CHECKOLD.(param).adj_err(i) = libargo.meanoutnan(FL.([param '_adjusted_error']).data(n_prof,:));
                         CHECKOLD.(param).raw(i) = libargo.meanoutnan(FL.(param).data(n_prof,:));
                         
-                        FL = libargo.format_flags_char2num(FL);
+                        %FL = libargo.format_flags_char2num(FL);
                         
                         the_qc = FL.([param '_adjusted_qc']).data(n_prof,:);
                         the_qc(the_qc==0)=99;

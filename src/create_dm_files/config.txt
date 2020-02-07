@@ -7,8 +7,8 @@
 %DIR_FTP=/export/home1/ccabanes/data/DOI_ARGO/201705-ArgoData/coriolis/ 
 DIR_FTP=/export/home1/ccabanes/data/FTP_ARGO/coriolis/
 
-% CALIBRATION files from OW: cal_$float_name$.mat ( MAIN_write_dmqc_files will look in DIR_OW/float_calib/) 
-DIR_OW=/home1/homedir5/perso/ccabanes/dvlpRD/Argo/TD/CORRECTIONS/data/
+% CALIBRATION files from OW: cal_$float_name$.mat ( MAIN_write_dmqc_files will look in DIR_OW/float_calib/$flt_name$/) 
+DIR_OW=/export/home1/ccabanes/data/QCARGO/TRAITEMENT/data/
 
 % output files with DMQC corrections are put in this directory (MAIN_write_dmqc_files will put files in DIR_OUT/$flt_name$/profiles/)
 DIR_OUT=/export/home1/ccabanes/data/DM_FILES/coriolis/
