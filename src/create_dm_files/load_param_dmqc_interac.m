@@ -122,7 +122,8 @@ while choiceishelp==1
     s.MOD_PSAL_ADJ_QC_DIRECTION{1}='A';
     display(['Default psal-adjusted_qc cycles:' num2str(FLd.cycle_number.data(1)) '-' num2str( max(C_FILE.PROFILE_NO))])
     defqc=ones(length(s.MOD_PSAL_ADJ_QC_CYCLE{1}),1);
-    %defcy=s.MOD_PSAL_ADJ_QC_CYCLE{1};
+    defcy=s.MOD_PSAL_ADJ_QC_CYCLE{1};
+    
     display(defqc')
     switch choice
         case{'OK'}
@@ -152,7 +153,8 @@ while choiceishelp==1
                     s.MOD_PSAL_ADJ_QC{ic} = strtrim(answer{1});
                     s.MOD_PSAL_ADJ_QC_DIRECTION{ic}=strtrim(answer{3})
                     eval(['s.MOD_PSAL_ADJ_QC_CYCLE{ic} = ' answer{2} ';']);
-                    defqc(s.MOD_PSAL_ADJ_QC_CYCLE{ic})=str2num(s.MOD_PSAL_ADJ_QC{ic});
+                    
+                    defqc(ismember(defcy,s.MOD_PSAL_ADJ_QC_CYCLE{ic}))=str2num(s.MOD_PSAL_ADJ_QC{ic});
                     display('Changed to:')
                     display(defqc')
                     if str2num(s.MOD_PSAL_ADJ_QC{ic})>=2 && str2num(s.MOD_PSAL_ADJ_QC{ic})<4 % quand c'est 4 c'est à fillvalue.
