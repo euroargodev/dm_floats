@@ -156,6 +156,7 @@ end
 ifirst=NaN;
 iswc_pres=2;
 
+thedate=datestr(now,'yyyymmddHHMMSS');
 %keyboard
 %--------------------------------------------------------------------
 for i=1:length(therep)  % WORK ON EACH FILE 
@@ -928,9 +929,9 @@ for i=1:length(therep)  % WORK ON EACH FILE
                 end
                 
                 if format_version<2.3
-                    FLD.calibration_date.data(n_prof,n_calib,ind_psal,:)=datestr(now,'yyyymmddHHMMSS');
+                    FLD.calibration_date.data(n_prof,n_calib,ind_psal,:)=thedate;
                 else
-                    FLD.scientific_calib_date.data(n_prof,n_calib,ind_psal,:)=datestr(now,'yyyymmddHHMMSS');
+                    FLD.scientific_calib_date.data(n_prof,n_calib,ind_psal,:)=thedate;
                 end
                 
                 
@@ -990,9 +991,9 @@ for i=1:length(therep)  % WORK ON EACH FILE
                         
                         
                         if format_version<2.3
-                            FLD.calibration_date.data(n_prof,n_calib,ind_pres,:)=datestr(now,'yyyymmddHHMMSS');
+                            FLD.calibration_date.data(n_prof,n_calib,ind_pres,:)=thedate;
                         else
-                            FLD.scientific_calib_date.data(n_prof,n_calib,ind_pres,:)=datestr(now,'yyyymmddHHMMSS');
+                            FLD.scientific_calib_date.data(n_prof,n_calib,ind_pres,:)=thedate;
                         end
                         iswc_pres=2;
                     end
@@ -1050,9 +1051,9 @@ for i=1:length(therep)  % WORK ON EACH FILE
                         
                         
                         if format_version<2.3
-                            FLD.calibration_date.data(n_prof,n_calib,ind_pres,:)=datestr(now,'yyyymmddHHMMSS');
+                            FLD.calibration_date.data(n_prof,n_calib,ind_pres,:)=thedate;
                         else
-                            FLD.scientific_calib_date.data(n_prof,n_calib,ind_pres,:)=datestr(now,'yyyymmddHHMMSS');
+                            FLD.scientific_calib_date.data(n_prof,n_calib,ind_pres,:)=thedate;
                         end
                         
                     end
@@ -1110,9 +1111,9 @@ for i=1:length(therep)  % WORK ON EACH FILE
                 end
                 CHECK.temp.comment{i} = squeeze(FLD.scientific_calib_comment.data(n_prof,n_calib,ind_temp,:))';
                 if format_version<2.3
-                    FLD.calibration_date.data(n_prof,n_calib,ind_temp,:)=datestr(now,'yyyymmddHHMMSS');
+                    FLD.calibration_date.data(n_prof,n_calib,ind_temp,:)=thedate;
                 else
-                    FLD.scientific_calib_date.data(n_prof,n_calib,ind_temp,:)=datestr(now,'yyyymmddHHMMSS');
+                    FLD.scientific_calib_date.data(n_prof,n_calib,ind_temp,:)=thedate;
                 end
                 
                 
@@ -1251,9 +1252,9 @@ for i=1:length(therep)  % WORK ON EACH FILE
                     end
                     
                     if format_version<2.3
-                        FLD.calibration_date.data(n_prof,n_calib,ind_cndc,:)=datestr(now,'yyyymmddHHMMSS');
+                        FLD.calibration_date.data(n_prof,n_calib,ind_cndc,:)=thedate;
                     else
-                        FLD.scientific_calib_date.data(n_prof,n_calib,ind_cndc,:)=datestr(now,'yyyymmddHHMMSS');
+                        FLD.scientific_calib_date.data(n_prof,n_calib,ind_cndc,:)=thedate;
                     end
                     
                 end
@@ -1324,7 +1325,7 @@ for i=1:length(therep)  % WORK ON EACH FILE
                 l_ref=length(ref);
                 FLD.history_reference.data(new_hist,n_prof,1:l_ref)=ref;
                 
-                FLD.history_date.data(new_hist,n_prof,:)=datestr(now,'yyyymmddHHMMSS');
+                FLD.history_date.data(new_hist,n_prof,:)=thedate;
                 
                 action='IP';
                 l_ac=length(action);
@@ -1351,7 +1352,7 @@ for i=1:length(therep)  % WORK ON EACH FILE
                 
                 % Save modifications in the D file
                 
-                FLD.date_update.data = datestr(now,'yyyymmddHHMMSS')';
+                FLD.date_update.data = thedate';
                 
                 % verifie qu'il n'y ait pas de NaN, et sinon remplace par des
                 % fill_value
