@@ -159,11 +159,12 @@ iswc_pres=2;
 thedate=datestr(now,'yyyymmddHHMMSS');
 %keyboard
 %--------------------------------------------------------------------
-for i=1:length(therep)  % WORK ON EACH FILE 
-
-    ifirst=min(ifirst,i);
+i=0; % CHECK indices
+for ifile=1:length(therep)  % WORK ON EACH FILE 
+    
+    ifirst=min(ifirst,ifile);
     % open R_file (or D_file) and check cycle number
-    file_in=therep{i};
+    file_in=therep{ifile};
     
     % read the netcddf file    
     [FL,DIM,Globatt] = libargo.read_netcdf_allthefile([root_in,file_in]);
@@ -254,8 +255,8 @@ for i=1:length(therep)  % WORK ON EACH FILE
             if (isempty (ind_cycle) & cycle < max(C_FILE.PROFILE_NO))||cycle > max(C_FILE.PROFILE_NO)
                 warning(['The cycle ' num2str(cycle) ' has not gone through OW. Nothing is done for this file'])
                 fprintf (fic,'%s \n', ['WARNING : The cycle ' num2str(cycle) ' has not gone through OW. Nothing is done for this file']);
-                
             else
+			i=i+1;
                 % Format checker: if data_mode='D' or 1 2C : the file should be a 'D file'
                 file_out=['D' file_in(2:length(file_in))];
                 disp([text_disp ' - Dfile']);
@@ -1375,6 +1376,7 @@ for i=1:length(therep)  % WORK ON EACH FILE
                 %CHECK.n_cycle_for_plot: numero de cycle pour le plot de check: profil ascendant decale de 0.5 dans cas ou il y a un profil descendant et un profil ascendant pour un meme cycle
                 % cela permet de tracer les qc de tous les profils A et D.
                 
+				
                 if direction=='A'
                     if i>ifirst && CHECK.n_cycle(i-1)==FLD.cycle_number.data(n_prof); % cyle D et cycle A pour un meme cycle
                         CHECK.n_cycle_for_plot(i) =double(FLD.cycle_number.data(n_prof))+0.5;
@@ -1452,6 +1454,7 @@ for i=1:length(therep)  % WORK ON EACH FILE
         end
     end
 end
+
 
 fclose(fic);
 %keyboard
