@@ -74,6 +74,8 @@ rep=dir([root_in '*.nc']);
 filenames={rep.name};
 ischarcellB = strfind(filenames,'B');
 ischarcellM = strfind(filenames,'M');
+ischarcellS = strfind(filenames,'S');
+core_files = filenames;
 
 if ~isempty(ischarcellB)|~isempty(ischarcellM) % enleve B et M files
     core_files = filenames(cellfun(@isempty,ischarcellB)&cellfun(@isempty,ischarcellM));
@@ -431,15 +433,23 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     
                     % if flag '4' in PRES_ADJUSTED_QC then flag '4' in TEMP_ADJUSTED_QC
                     FLD.temp_adjusted_qc.data(n_prof,index_QC4_PRES) = '4';
-                    
+					
+					
+					% keep missing values as in TEMP
+                    index_QC9_TEMP = strfind(FLD.temp_qc.data(n_prof,:),'9');
+					FLD.temp_adjusted_qc.data(n_prof,index_QC9_TEMP) = '9';
+
                     % Check for TEMP_ADJUSTED_QC='4'-> TEMP_ADJUSTED and TEMP_ADJUSTED_ERROR are fill_value
                     
-                    
-                    index_QC4 = strfind(FLD.temp_adjusted_qc.data(n_prof,:),'4');
-                    
-                    FLD.temp_adjusted.data(n_prof,index_QC4) = FLD.temp_adjusted.FillValue_ ;
-                    FLD.temp_adjusted_error.data(n_prof,index_QC4) = FLD.temp_adjusted_error.FillValue_ ;
-                    
+                    index_QC4_TEMP = strfind(FLD.temp_adjusted_qc.data(n_prof,:),'4');
+					
+                    FLD.temp_adjusted.data(n_prof,index_QC4_TEMP) = FLD.temp_adjusted.FillValue_ ;
+                    FLD.temp_adjusted_error.data(n_prof,index_QC4_TEMP) = FLD.temp_adjusted_error.FillValue_ ;
+					
+					% Check for TEMP_ADJUSTED_QC='9'-> make sure TEMP_ADJUSTED and TEMP_ADJUSTED_ERROR are fill_value
+                    FLD.temp_adjusted.data(n_prof,index_QC9_TEMP) = FLD.temp_adjusted.FillValue_ ;
+                    FLD.temp_adjusted_error.data(n_prof,index_QC9_TEMP) = FLD.temp_adjusted_error.FillValue_ ;
+					
                     input_temp = FL.temp.data(n_prof,:);
 
                     if isfield(s,'force')==1&&strcmp(s.force,'adjusted')
@@ -554,19 +564,34 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             end
                             
                             % if flag '9' in PRES_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC
-                            psal_adjusted_qc(index_QC9_PRES) = '4';                      % % modif 18/06/2018
+                             % psal_adjusted_qc(index_QC9_PRES) = '4';                      % % modif 18/06/2018
                             
                     end
                     %keyboard
                     
                    % set PSAL_ADJUSTED_QC
                    %--------------
-                   % keyboard                   
+                   % keyboard    
+				   
+                    %if flag '4' in PRES_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC
+                     psal_adjusted_qc(index_QC4_PRES) = '4';
+                    %if PSAL is fillvalue, put PSAL_ADJUSTED_QC to 4,	(this can be the case if PRES_ADJUSTED or TEMP_ADJUSTED are fillvalue i.e. flag 4 or 9)				 
+                    isfill_PSAL=find(isnan(psal_adjusted));
+					psal_adjusted_qc(isfill_PSAL) = '4';
                    
-                    % if flag '4' in PRES_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC
-                    psal_adjusted_qc(index_QC4_PRES) = '4';
-                    
-                    
+					% % % if flag '4' in TEMP_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC % modif 21/04/2018
+                    % psal_adjusted_qc(index_QC4_TEMP) = '4';
+					% % % if flag '9' in TEMP_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC % modif 21/04/2018
+                     % psal_adjusted_qc(index_QC9_TEMP) = '4';
+					% % if flag '9' in PRESS_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC % modif 21/04/2018
+					% psal_adjusted_qc(index_QC9_PRES) = '4';  
+					 
+					
+					 
+					 % % if PSAL_QC==9, PSAL_QC_ADJUSTED==9 keep missing values as in PSAL
+                     index_QC9_PSAL = strfind(FLD.psal_qc.data(n_prof,:),'9'); % modif 21/04/2018
+					 psal_adjusted_qc(index_QC9_PSAL )= '9';
+					
                     % if PSAL_QC==2, PSAL_QC_ADJUSTED==1
                     psal_adjusted_qc = strrep(psal_adjusted_qc,'2','1');
                     
@@ -590,8 +615,14 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     
                     psal_adjusted (is_qc4) = FLD.psal_adjusted.FillValue_;
                     psal_adjusted_error (is_qc4) = FLD.psal_adjusted_error.FillValue_;
+                     
+                    %find PSAL_QC==9 and set PSAL_ADJSUTED and PSAL_ADJUSTED_ERROR to FillValue)
+                    is_qc9 = strfind( psal_adjusted_qc, '9');
                     
-
+                    psal_adjusted (is_qc9) = FLD.psal_adjusted.FillValue_;
+                    psal_adjusted_error (is_qc9) = FLD.psal_adjusted_error.FillValue_;
+					
+					
                     % Check if adjustement > 0.05PSU
                     is_sup_005 = find((abs(psal_adjusted-FL.psal.data(n_prof,:))>0.05) & psal_adjusted~=FLD.psal_adjusted.FillValue_);
                     
