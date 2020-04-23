@@ -162,6 +162,7 @@ thedate=datestr(now,'yyyymmddHHMMSS');
 %keyboard
 %--------------------------------------------------------------------
 i=0; % CHECK indices
+
 for ifile=1:length(therep)  % WORK ON EACH FILE 
     
     ifirst=min(ifirst,ifile);
@@ -571,26 +572,33 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     
                    % set PSAL_ADJUSTED_QC
                    %--------------
-                   % keyboard    
-				   
-                    %if flag '4' in PRES_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC
-                     psal_adjusted_qc(index_QC4_PRES) = '4';
-                    %if PSAL is fillvalue, put PSAL_ADJUSTED_QC to 4,	(this can be the case if PRES_ADJUSTED or TEMP_ADJUSTED are fillvalue i.e. flag 4 or 9)				 
-                    isfill_PSAL=find(isnan(psal_adjusted));
+					 not_fillval_psal = (FL.psal.data(n_prof,:)~=FL.psal.FillValue_); % check if PSAL values are blank or missing
+
+					% In case PRES_ADJUSTED or TEMP_ADJUSTED are fillvalue, computation (ow or  PSAL adjusted for pres corrections) will result in  psal_adjusted=NaN.
+					% If psal_adjusted is NaN  put PSAL_ADJUSTED_QC to 4 )% modif 21/04/2018
+                    isfill_PSAL = find(isnan(psal_adjusted)&not_fillval_psal);
 					psal_adjusted_qc(isfill_PSAL) = '4';
-                   
-					% % % if flag '4' in TEMP_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC % modif 21/04/2018
-                    % psal_adjusted_qc(index_QC4_TEMP) = '4';
-					% % % if flag '9' in TEMP_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC % modif 21/04/2018
-                     % psal_adjusted_qc(index_QC9_TEMP) = '4';
-					% % if flag '9' in PRESS_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC % modif 21/04/2018
-					% psal_adjusted_qc(index_QC9_PRES) = '4';  
-					 
+                    isnan_PSAL = find(isnan(psal_adjusted));
+					psal_adjusted(isnan_PSAL) = FL.psal.FillValue_;
 					
+                    %if flag '4' in PRES_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC
+                    psal_adjusted_qc(index_QC4_PRES) = '4';
+					% if flag '4' in TEMP_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC % modif 21/04/2018
+                    psal_adjusted_qc(index_QC4_TEMP) = '4';
 					 
-					 % % if PSAL_QC==9, PSAL_QC_ADJUSTED==9 keep missing values as in PSAL
-                     index_QC9_PSAL = strfind(FLD.psal_qc.data(n_prof,:),'9'); % modif 21/04/2018
-					 psal_adjusted_qc(index_QC9_PSAL )= '9';
+                   
+					% if PSAL_QC==' ',keep blank values as in PSAL
+					index_blanck_PSAL = strfind(FL.psal_qc.data(n_prof,:),' '); % modif 21/04/2018
+					psal_adjusted_qc(index_blanck_PSAL )= ' ';
+				   	psal_adjusted(index_blanck_PSAL) = FL.psal.FillValue_;
+
+				   % if PSAL_QC==9,keep missing values as in PSAL
+                    index_QC9_PSAL = strfind(FL.psal_qc.data(n_prof,:),'9'); % modif 21/04/2018
+					psal_adjusted_qc(index_QC9_PSAL )= '9';
+					psal_adjusted(index_QC9_PSAL) = FL.psal.FillValue_;
+					
+				
+
 					
                     % if PSAL_QC==2, PSAL_QC_ADJUSTED==1
                     psal_adjusted_qc = strrep(psal_adjusted_qc,'2','1');
