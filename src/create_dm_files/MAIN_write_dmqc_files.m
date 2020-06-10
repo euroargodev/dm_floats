@@ -329,8 +329,8 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         if  sum(isfillval_err)==length(isfillval_err)  % mode A: pressure adjusted in real time only: it is processed, but with a warning
                             INPUT_PRESAD=2;
                             input_pres = FL.pres_adjusted.data(n_prof,:);
-                            f=warndlg('Pressure is adjsuted in Real Time: you should first process the delayed time adjustment of the pressure before calibrating salinity','PRES_ADJUSTED');
-                            uiwait(f)
+                            warning('Pressure is adjsuted in Real Time: you should first process the delayed time adjustment of the pressure before calibrating salinity','PRES_ADJUSTED');
+                            %uiwait(f)
                             if isfield(s,'force')==0
                             disp([' Cycle' num2str(cycle) ': Input pressures are PRES_ADJUSTED, because an adjustement had been made on pressure'])
                             fprintf (fic,'%s \n', ['       : Input pressures are PRES_ADJUSTED, because an adjustement had been made on pressure']);
@@ -491,8 +491,9 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     if isfield(s,'force')==1&&strcmp(s.force,'adjusted')
                         input_psal = FL.psal_adjusted.data(n_prof,:);
                         testi = libargo.check_isfillval_prof(FL,'psal_adjusted')
-                        if numel(input_psal)==sum(isnan(input_psal))
-                           error('You replied that the CTM correction was applied,  but the PSAL_ADJUSTED variable is empty!!!')
+                        %if numel(input_psal)==sum(isnan(input_psal))
+                        if numel(input_psal)==sum(isnan(input_psal))& numel(FL.psal.data(n_prof,:))~=sum(isnan(FL.psal.data(n_prof,:))) % change 25/05/2020
+                           error('You forced the program to load PARAM_ADJUSTED, but the PSAL_ADJUSTED variable is empty!!!')
                         end
                     end
                     
@@ -775,6 +776,22 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     end
                     display(n_calib)
                     FLD.parameter.data(:,n_calib,:,:) = FLD.station_parameters.data;
+					
+					% initialize the calib section with fillvalues. % add 25/05/2020
+					%keyboard
+					thesize=size(FLD.scientific_calib_equation.data);
+					for iprof=1:thesize(1)
+						for iparam=1:thesize(3)
+							FLD.scientific_calib_equation.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_equation.FillValue_;
+							FLD.scientific_calib_coefficient.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_coefficient.FillValue_;
+							FLD.scientific_calib_comment.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_comment.FillValue_;
+								if format_version<2.3
+									FLD.calibration_date.data(iprof,n_calib,iparam,:)=FLD.calibration_date.FillValue_;
+								else
+									FLD.scientific_calib_date.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_date.FillValue_;
+								end
+						end
+					end
                 end
                 
                 
@@ -793,7 +810,8 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                 ind_psal = ismember(cellstr(theparameters),'PSAL');
                 ind_pres = ismember(cellstr(theparameters),'PRES');
                 % find in pressure equation if surface pressure has been used to calibrate pressure
-                presiscalib = ~isempty(strfind(squeeze(FL.scientific_calib_equation.data(n_prof,n_calib,ind_pres,:))','-'));
+                %presiscalib = ~isempty(strfind(squeeze(FL.scientific_calib_equation.data(n_prof,n_calib,ind_pres,:))','-'));
+				presiscalib = ~isempty(strfind(squeeze(FL.scientific_calib_equation.data(n_prof,1,ind_pres,:))','-')); % change 07/05/2020
                 
                 switch   thecorrection
                     case {'NO'}; % considered as good and need no adjustement in DM
