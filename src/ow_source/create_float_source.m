@@ -460,7 +460,26 @@ else
     end
     
     
-    [indlevmax,cyclevmax]=max(tabnpt);
+     [indlevmax,cyclevmax_i]=max(tabnpt);
+    
+    % Correct cyclevmax when different vertical sampling are used during
+    % the float life. Antonella GALLO - 07/2022
+    
+    [cyclevmax_n]=find(tabnpt==indlevmax);
+    vmax_n=PRESINI(end,cyclevmax_n(1));
+    cyclevmax=cyclevmax_i;
+    for ic=2:length(cyclevmax_n)
+        vmax_ni=PRESINI(end,cyclevmax_n(ic));
+        if vmax_ni>=vmax_n
+            vmax_n=vmax_ni;
+            cyclevmax=cyclevmax_n(ic);
+        end
+    end
+    disp(cyclevmax);
+    mDepthValue=max(PRESINI,[],1);
+    if PRESINI(end,cyclevmax)~=max(mDepthValue)
+        warning('The final PRES array has a different maximun pressure from the initial PRES array')
+    end
     
     vecpresref=PRESINI(:,cyclevmax);
     
