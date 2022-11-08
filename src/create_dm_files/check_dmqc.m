@@ -22,15 +22,17 @@ if isfield(CHECK,param)
     %set(gca,'FontWeight','bold')
     hold on
     grid on
+	box on
     plot( CHECK.n_cycle_for_plot, CHECK.(param).n_correction,'-+');
     
     
     title([float_number ': Mean ' upper(param) ' CORRECTION (' param '_adjusted - ' param ') in the netcdf file'],'interpreter', 'none')
-    xlabel('n_cycle','interpreter','none')
+    %xlabel('n_cycle','interpreter','none')
     ylabel([ param ' units'])
     
     xlim=get(gca,'XLim');
-    xlim1=get(gca,'XLim');
+    xlim1=[xlim(1) max(CHECK.n_cycle_for_plot)];
+    xlim=xlim1;
     
     ylim1(1)=libargo.sd_round(min(CHECK.(param).n_correction),5);
     ylim1(2)=libargo.sd_round(max(CHECK.(param).n_correction),5);
@@ -57,6 +59,7 @@ if isfield(CHECK,param)
     %set(gca,'FontWeight','bold')
     hold on
     box on
+    grid on
     w(:,:)=[1,1,1;0,0,1;0.3,1,0.3;1,1,0.3;1,0.7,0.3;1,0.3,0.3];
    % w(:,:)=[0,0,0;0.3,1,0.3;1,1,0.3;1,0.7,0.3;1,0.3,0.3];
     CHECK.(param).adjqc(CHECK.(param).adjqc==99)=-1;
@@ -64,12 +67,26 @@ if isfield(CHECK,param)
     %keyboard
     a=[CHECK.n_cycle_for_plot,CHECK.n_cycle_for_plot(end)+1];
     b=double([CHECK.(param).adjqc;CHECK.(param).adjqc(end,:)]);
+	A=repmat(a',[1,size(b,2)]);
+    c=[1:size(CHECK.(param).qc,2)];
+    C=repmat(c, [size(b,1),1]);
     %pcolor([1:size(CHECK.(param).adjqc,1)],[1:size(CHECK.(param).adjqc,2)],double(CHECK.(param).adjqc'))
-    pcolor(a,[1:size(CHECK.(param).adjqc,2)],b')
+    %pcolor(a,[1:size(CHECK.(param).adjqc,2)],b')
+    ii=find(b==0);
+    scatter(A(ii),C(ii),10,'*b')
+    ii=find(b==1);
+    scatter(A(ii),C(ii),10,'*g')
+    ii=find(b==2);
+    scatter(A(ii),C(ii),10,'*y')
+    ii=find(b==3);
+    scatter(A(ii),C(ii),10,'*m')
+    ii=find(b==4);
+    scatter(A(ii),C(ii),10,'*r')
     set(gca,'YDir','reverse')
-    shading('flat')
-    ylabel('level #')
-    xlabel('n_cycle','interpreter','none')
+    set(gca,'YDir','reverse')
+    %shading('flat')
+    ylabel('level')
+    %xlabel('n_cycle','interpreter','none')
     title([upper(param) '_ADJUSTED_QC  in the netcdf file'],'interpreter', 'none')
     
     
@@ -84,17 +101,31 @@ if isfield(CHECK,param)
     %set(gca,'FontWeight','bold')
     hold on
     box on
+    grid on
     %w(:,:)=[0,0,0;0.3,1,0.3;1,1,0.3;1,0.7,0.3;1,0.3,0.3];
     w(:,:)=[1,1,1;0,0,1;0.3,1,0.3;1,1,0.3;1,0.7,0.3;1,0.3,0.3];
     CHECK.(param).qc(CHECK.(param).qc==99)=-1;
     a=[CHECK.n_cycle_for_plot,CHECK.n_cycle_for_plot(end)+1];
     b=double([CHECK.(param).qc;CHECK.(param).qc(end,:)]);
+	A=repmat(a',[1,size(b,2)]);
+    c=[1:size(CHECK.(param).qc,2)];
+    C=repmat(c, [size(b,1),1]);
     %pcolor([1:size(CHECK.(param).adjqc,1)],[1:size(CHECK.(param).adjqc,2)],double(CHECK.(param).adjqc'))
-    pcolor(a,[1:size(CHECK.(param).qc,2)],b')
+    %pcolor(a,[1:size(CHECK.(param).qc,2)],b')
+     ii=find(b==0);
+    scatter(A(ii),C(ii),10,'*b')
+    ii=find(b==1);
+    scatter(A(ii),C(ii),10,'*g')
+    ii=find(b==2);
+    scatter(A(ii),C(ii),10,'*y')
+    ii=find(b==3);
+    scatter(A(ii),C(ii),10,'*m')
+    ii=find(b==4);
+    scatter(A(ii),C(ii),10,'*r')
     set(gca,'YDir','reverse')
-    shading('flat')
-    ylabel('level #')
-    xlabel('n_cycle','interpreter','none')
+    %shading('flat')
+    ylabel('level')
+   % xlabel('n_cycle','interpreter','none')
     title([upper(param) '_QC  in the netcdf file'],'interpreter', 'none')
     
     colormap(w)
@@ -128,7 +159,7 @@ if isfield(CHECK,param)
             ylim3(1)=-1;
             ylim3(2)=1;
     end
-    axis([xlim3(1) xlim3(2)+0.5 ylim3(1) ylim3(2)])
+    axis([xlim(1) xlim(2)+0.5 ylim3(1) ylim3(2)])
     %  h1=gca;
     %  set(h1,'YAxisLocation','left','TickLength',[0 0])
     %  h2=axes('position',get(h1,'position'),'color','none');
@@ -147,41 +178,41 @@ if isfield(CHECK,param)
     xlabel('n_cycle','interpreter','none')
     
     
-    % PATCH
-    for ik=[1,4]
-        subplot(4,1,ik)
+    % % PATCH
+    % for ik=[1,4]
+        % subplot(4,1,ik)
         
-        xlim=get(gca,'XLim');
-        ylim=libargo.sd_round(get(gca,'YLim'),5);
-        if (ylim(1)==ylim(2))
-            ylim(1)=ylim(1)-abs(ylim(1)/10);
-            ylim(2)=ylim(2)+abs(ylim(1)/10);
-        end
+        % xlim=get(gca,'XLim');
+        % ylim=libargo.sd_round(get(gca,'YLim'),5);
+        % if (ylim(1)==ylim(2))
+            % ylim(1)=ylim(1)-abs(ylim(1)/10);
+            % ylim(2)=ylim(2)+abs(ylim(1)/10);
+        % end
         
-        vec=[xlim(1) APPLY_upto_CY+0.5 ];
+        % vec=[xlim(1) APPLY_upto_CY+0.5 ];
         
-        for k=1:length(vec)-1
-            xdata=[vec(k) vec(k+1)  vec(k+1) vec(k)];
-            ydata=[ylim(1) ylim(1) ylim(2) ylim(2)];
-            p=patch(xdata,ydata,'w');
-            xpos= [vec(k)+(vec(k+1)-vec(k))/2];
-            ypos= [ylim(1)+(ylim(2)-ylim(1))/1.5];
-            thecorrection=CORRECTION{k};
+        % for k=1:length(vec)-1
+            % xdata=[vec(k) vec(k+1)  vec(k+1) vec(k)];
+            % ydata=[ylim(1) ylim(1) ylim(2) ylim(2)];
+            % p=patch(xdata,ydata,'w');
+            % xpos= [vec(k)+(vec(k+1)-vec(k))/2];
+            % ypos= [ylim(1)+(ylim(2)-ylim(1))/1.5];
+            % thecorrection=CORRECTION{k};
             
             
-            switch thecorrection
-                case{'NO'}
-                    set(p,'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.5,'EdgeColor',[0.9 0.9 0.9]);
-                case{'LAUNCH_OFFSET'}
-                    set(p,'FaceColor',[0.8 0.8 1],'FaceAlpha',0.5,'EdgeColor',[0.9 0.9 0.9]);
-                case{'OW'}
-                    set(p,'FaceColor',[1 0.8 0.8],'FaceAlpha',0.5,'EdgeColor',[0.9 0.9 0.9]);
-            end
-            text(double(xpos),double(ypos),thecorrection,'interpreter','none')
-        end
-        clear xlim ylim
+            % switch thecorrection
+                % case{'NO'}
+                    % set(p,'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.5,'EdgeColor',[0.9 0.9 0.9]);
+                % case{'LAUNCH_OFFSET'}
+                    % set(p,'FaceColor',[0.8 0.8 1],'FaceAlpha',0.5,'EdgeColor',[0.9 0.9 0.9]);
+                % case{'OW'}
+                    % set(p,'FaceColor',[1 0.8 0.8],'FaceAlpha',0.5,'EdgeColor',[0.9 0.9 0.9]);
+            % end
+            % text(double(xpos),double(ypos),thecorrection,'interpreter','none')
+        % end
+        % clear xlim ylim
         
-    end
+    % end
     
     subplot(4,1,1)
     plot( CHECK.n_cycle_for_plot, CHECK.(param).n_correction,'-+');
@@ -191,7 +222,7 @@ if isfield(CHECK,param)
     subplot(4,1,4)
     plot( CHECK.n_cycle_for_plot, CHECK.(param).adj_err,'-+r');
     %keyboard
-    axis([xlim3(1) xlim3(2)+0.5 ylim3(1) ylim3(2)])
+    axis([xlim(1) xlim(2)+0.5 ylim3(1) ylim3(2)])
     drawnow
     %  plot (C_FILE.PROFILE_NO,cal_sal,'g')
     %  plot (n_cycle,adj_sal,'+r')
