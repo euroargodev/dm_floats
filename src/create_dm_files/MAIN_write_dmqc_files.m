@@ -2,13 +2,13 @@
 %   USAGE :  MAIN_write_dmqc_files(flt_name)
 %
 %   PURPOSE : This program is used to write core Argo D-files with salinity calibration for offset or drift obtained with OW software
-%   
+%
 %    This program allows to choose between 3 corrections:
 %   - no salinity correction is applied (NO)
-%   - salinity correction obtained from the OW method is applied (OW) : it is possible to apply the OW correction only on a part of the time series and no correction before or/and after. 
+%   - salinity correction obtained from the OW method is applied (OW) : it is possible to apply the OW correction only on a part of the time series and no correction before or/and after.
 %   - a constant salinity offset obtained from CTD cast made at LAUNCH is applied (LAUNCH_OFFSET)
-%   
-%   Interactive dialog boxes are used to set: 
+%
+%   Interactive dialog boxes are used to set:
 %   - default PSAL_ADJUSTED_QC for each cycle
 %   - errors  PSAL_ADJUSTED_ERROR
 %   - comments  used to fill SCIENTIFIC_CALIBRATION_comment for PSAL
@@ -27,7 +27,7 @@
 %   HISTORY
 %  ??/???? : C.Coatanoan: - creation (fichier_nc_dmqc_ovide.m)
 %  from 12/2014 : C.Cabanes : -interactive input, use of +libargo, format 3.1
-% 
+%
 %  tested with matlab  8.3.0.532 (R2014a)
 %
 %  EXTERNAL LIB
@@ -42,25 +42,28 @@ function MAIN_write_dmqc_files(flt_name)
 disp('%%%%%%%')
 disp('Delayed-Mode NetCDF files')
 % if run in create_dm_files directory
-addpath('../../lib/')  
+addpath('../../lib/')
 addpath('../../lib/seawater_330_its90/')
 
 % INPUT/OUTPUT files
-C=load_configuration('config.txt');
+%C=load_configuration('config.txt');
+C=load_configuration('config_cc.txt');
 DIR_FTP= C.DIR_FTP;    % input files directory
 DIR_OW = C.DIR_OW;     % calibration files directory(cal_$flt_name$.mat files)
 DIR_OUT = C.DIR_OUT;   % output files with DMQC corrections are put in this directory
 
 %%%%%%%%%%%%%%%%%
 if ischar(flt_name)==0
-flotteur = num2str(flt_name);
+    flotteur = num2str(flt_name);
 else
-flotteur = strtrim(flt_name);
+    flotteur = strtrim(flt_name);
 end
 
-DIR_CAL=[DIR_OW 'float_calib/'  ];
+%DIR_CAL=[DIR_OW 'float_calib/'  ];
+DIR_CAL=[DIR_OW 'float_calib/CONFIG149/'  ];
 
-C_FILE = load([DIR_CAL num2str(flotteur) '/cal_' num2str(flotteur) '.mat']);
+%C_FILE = load([DIR_CAL num2str(flotteur) '/cal_' num2str(flotteur) '.mat']);
+C_FILE = load([DIR_CAL '/cal_' num2str(flotteur) '.mat']);
 
 root_in=[DIR_FTP num2str(flotteur) '/profiles/']
 
@@ -102,25 +105,25 @@ NcVar.format_version.name='FORMAT_VERSION';
 
 format_version = str2num(FLd.format_version.data');
 if format_version>=3
-   is_primary = libargo.findstr_tab(FLd.vertical_sampling_scheme.data,'Primary sampling');
-   n_prof = find(is_primary);
-        if isempty(n_prof)
-            warning([file_in ' :Primary profile not found'])
-        end
+    is_primary = libargo.findstr_tab(FLd.vertical_sampling_scheme.data,'Primary sampling');
+    n_prof = find(is_primary);
+    if isempty(n_prof)
+        warning([file_in ' :Primary profile not found'])
+    end
 else
-   n_prof=1;
+    n_prof=1;
 end
 first_cycle = FLd.cycle_number.data(n_prof);
 
 format_version=str2num(FLe.format_version.data');
 if format_version>=3
-   is_primary=libargo.findstr_tab(FLe.vertical_sampling_scheme.data,'Primary sampling');
-   n_prof = find(is_primary);
-        if isempty(n_prof)
-            warning([file_in ' :Primary profile not found'])
-        end
+    is_primary=libargo.findstr_tab(FLe.vertical_sampling_scheme.data,'Primary sampling');
+    n_prof = find(is_primary);
+    if isempty(n_prof)
+        warning([file_in ' :Primary profile not found'])
+    end
 else
-   n_prof=1;
+    n_prof=1;
 end
 last_cycle = FLe.cycle_number.data(n_prof);
 
@@ -163,13 +166,13 @@ thedate=datestr(now,'yyyymmddHHMMSS');
 %--------------------------------------------------------------------
 i=0; % CHECK indices
 
-for ifile=1:length(therep)  % WORK ON EACH FILE 
+for ifile=1:length(therep)  % WORK ON EACH FILE
     
     ifirst=min(ifirst,ifile);
     % open R_file (or D_file) and check cycle number
     file_in=therep{ifile};
     
-    % read the netcddf file    
+    % read the netcddf file
     [FL,DIM,Globatt] = libargo.read_netcdf_allthefile([root_in,file_in]);
     
     format_version=str2num(FL.format_version.data');
@@ -191,15 +194,15 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
         trouv_mod=[];
         %keyboard
         for kkl=1:length(s.MOD_PSAL_ADJ_QC)
-        if sum(cycle==s.MOD_PSAL_ADJ_QC_CYCLE{kkl})>0
-           if direction==s.MOD_PSAL_ADJ_QC_DIRECTION{kkl}
-            CYC_PSAL_ADJ_QC = s.MOD_PSAL_ADJ_QC{kkl};
-            trouv_mod=kkl;
-           end
-        end
+            if sum(cycle==s.MOD_PSAL_ADJ_QC_CYCLE{kkl})>0
+                if direction==s.MOD_PSAL_ADJ_QC_DIRECTION{kkl}
+                    CYC_PSAL_ADJ_QC = s.MOD_PSAL_ADJ_QC{kkl};
+                    trouv_mod=kkl;
+                end
+            end
         end
         if isempty(trouv_mod)==0
-           CYC_PSAL_ADJ_QC = s.MOD_PSAL_ADJ_QC{trouv_mod};
+            CYC_PSAL_ADJ_QC = s.MOD_PSAL_ADJ_QC{trouv_mod};
         else
             CYC_PSAL_ADJ_QC = s.DEF_PSAL_ADJ_QC;
         end
@@ -207,6 +210,11 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
         
         % find the correction for the current cycle
         ind_correction = find(cycle > [-1 s.APPLY_upto_CY]& cycle<= [s.APPLY_upto_CY max(C_FILE.PROFILE_NO)]);
+         
+        % Deal with descending profiles at the end. ex 6900046   11/03/2022
+        if cycle==max(C_FILE.PROFILE_NO)+1 & direction == 'D'
+         ind_correction = find(cycle-1 > [-1 s.APPLY_upto_CY]& cycle-1<= [s.APPLY_upto_CY max(C_FILE.PROFILE_NO)]);  % correction of last cycle
+        end
         
         if isempty(ind_correction)==0
             
@@ -246,6 +254,9 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     % OW correction for cycle OA
                     ind_cycle = find(C_FILE.PROFILE_NO==cycle);
                     fprintf (fic,'%s \n', ['Descending profile, we use the correction applied to cycle ' num2str(cycle) 'A'] );
+                    if isnan(C_FILE.pcond_factor(ind_cycle))  % modif cc 13/04/2021 pour avoir une valeur pour 1D si flag a 4 du cycle 1A
+                        ind_cycle = find(C_FILE.PROFILE_NO==cycle+1);
+                    end
                 elseif direction =='A'
                     ind_cycle = find(C_FILE.PROFILE_NO==cycle);
                 end
@@ -259,13 +270,13 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                 warning(['The cycle ' num2str(cycle) ' has not gone through OW. Nothing is done for this file'])
                 fprintf (fic,'%s \n', ['WARNING : The cycle ' num2str(cycle) ' has not gone through OW. Nothing is done for this file']);
             else
-			i=i+1;
+                i=i+1;
                 % Format checker: if data_mode='D' or 1 2C : the file should be a 'D file'
                 file_out=['D' file_in(2:length(file_in))];
                 disp([text_disp ' - Dfile']);
-               
+                
                 %clear day_cyc  today
-
+                
                 %***************************PREPARE OUTPUT  ********************************
                 FLD = FL;
                 DIMD = DIM;
@@ -295,7 +306,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         FLD.pres_adjusted_error.data = repmat(FLD.pres_adjusted_error.FillValue_,size(FLD.pres_adjusted_error.data,1),size(FLD.pres_adjusted_error.data,2));
                         FLD.pres_adjusted_error = rmfield(FLD.pres_adjusted_error,{'valid_min','valid_max'});
                     end
-
+                    
                     %***************************INPUT : PRES or PRES_ADJUSTED? ******************
                     % find if PRES has already been adjusted (eg  APEX float)
                     % In this case OW inputs are: PRES_ADJUSTED, PSAL(calibrated in PRESSURE), TEMP
@@ -332,25 +343,25 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             warning('Pressure is adjsuted in Real Time: you should first process the delayed time adjustment of the pressure before calibrating salinity','PRES_ADJUSTED');
                             %uiwait(f)
                             if isfield(s,'force')==0
-                            disp([' Cycle' num2str(cycle) ': Input pressures are PRES_ADJUSTED, because an adjustement had been made on pressure'])
-                            fprintf (fic,'%s \n', ['       : Input pressures are PRES_ADJUSTED, because an adjustement had been made on pressure']);
+                                disp([' Cycle' num2str(cycle) ': Input pressures are PRES_ADJUSTED, because an adjustement had been made on pressure'])
+                                fprintf (fic,'%s \n', ['       : Input pressures are PRES_ADJUSTED, because an adjustement had been made on pressure']);
                             end
                         else % mode D
                             INPUT_PRESAD=1;
                             input_pres = FL.pres_adjusted.data(n_prof,:);
                             if isfield(s,'force')==0
-                            disp([' Cycle' num2str(cycle) ': Input pressures are PRES_ADJUSTED, because an adjustement had been made on pressure'])
-                            fprintf (fic,'%s \n', ['       : Input pressures are PRES_ADJUSTED, because an adjustement had been made on pressure']);
+                                disp([' Cycle' num2str(cycle) ': Input pressures are PRES_ADJUSTED, because an adjustement had been made on pressure'])
+                                fprintf (fic,'%s \n', ['       : Input pressures are PRES_ADJUSTED, because an adjustement had been made on pressure']);
                             end
                         end
                     end
-
+                    
                     if isfield(s,'force')==1&&strcmp(s.force,'adjusted')
                         input_pres = FL.pres_adjusted.data(n_prof,:);
                     end
                     
                     if INPUT_PRESAD==0|INPUT_PRESAD==2; % fill PRES_ADJUSTED fields
-                                                        % otherwise the previous PRES_ADJUSTED/ PRES_ADJUSTED_QC/ PRES_ADJUSTED_ERROR are kept
+                        % otherwise the previous PRES_ADJUSTED/ PRES_ADJUSTED_QC/ PRES_ADJUSTED_ERROR are kept
                         FLD.pres_adjusted.data(n_prof,:) = FLD.pres.data(n_prof,:);
                         FLD.pres_adjusted_qc.data(n_prof,:) = FLD.pres_qc.data(n_prof,:);
                         
@@ -360,7 +371,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         %elseif ismember (inst_type,{'842','847','852','857','861'}) % FSI
                         if ismember (inst_type,{'842','847','852','857','861'}) % FSI
                             the_error = 5;
-                       % else
+                            % else
                             %disp('Unknown WMO_INST_TYPE')
                             %the_error =  5 ;
                         end
@@ -374,13 +385,13 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     
                     % find PRES_QC=0 and replace with QC 1
                     
-                    if isempty (strfind(FLD.pres_adjusted_qc.data(n_prof,:),'0' ))==0   
+                    if isempty (strfind(FLD.pres_adjusted_qc.data(n_prof,:),'0' ))==0
                         disp('  PRES_QC=0 found !')
                         fprintf (fic,'%s \n', ['       : PRES_QC=0 found !']);
                         FLD.pres_adjusted_qc.data(n_prof,:) = strrep(FLD.pres_adjusted_qc.data(n_prof,:),'0','1');
                     end
                     
-                     % find QC  4 and 9
+                    % find QC  4 and 9
                     index_QC4_PRES = strfind(FLD.pres_adjusted_qc.data(n_prof,:),'4');
                     index_QC9_PRES = strfind(FLD.pres_adjusted_qc.data(n_prof,:),'9'); %  modif 18/06/2018
                     
@@ -388,7 +399,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         disp('QC4 for PRES_ADJUSTED are found')
                         fprintf (fic,'%s \n', ['       : QC4 for PRES_ADJUSTED are found']);
                     end
-                     if isempty(index_QC9_PRES)==0
+                    if isempty(index_QC9_PRES)==0
                         disp('QC9 for PRES_ADJUSTED are found')
                         fprintf (fic,'%s \n', ['       : QC9 for PRES_ADJUSTED are found']); % modif 18/06/2018
                     end
@@ -417,11 +428,11 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     
                     inst_type = strtrim(FLD.wmo_inst_type.data(n_prof,:));
                     %if ismember (inst_type,{'841','843','844','846','851','853','856','860','831','838'}) % SBE
-                        the_error =0.002;
+                    the_error =0.002;
                     %elseif ismember (inst_type,{'842','847','852','857','861'}) % FSI
                     if ismember (inst_type,{'842','847','852','857','861'}) % FSI
                         the_error = 0.01;
-                    %else
+                        %else
                         %disp('Unknown WMO_INST_TYPE')
                         %the_error =  0.01 ;
                     end
@@ -434,25 +445,25 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     
                     % if flag '4' in PRES_ADJUSTED_QC then flag '4' in TEMP_ADJUSTED_QC
                     FLD.temp_adjusted_qc.data(n_prof,index_QC4_PRES) = '4';
-					
-					
-					% keep missing values as in TEMP
+                    
+                    
+                    % keep missing values as in TEMP
                     index_QC9_TEMP = strfind(FLD.temp_qc.data(n_prof,:),'9');
-					FLD.temp_adjusted_qc.data(n_prof,index_QC9_TEMP) = '9';
-
+                    FLD.temp_adjusted_qc.data(n_prof,index_QC9_TEMP) = '9';
+                    
                     % Check for TEMP_ADJUSTED_QC='4'-> TEMP_ADJUSTED and TEMP_ADJUSTED_ERROR are fill_value
                     
                     index_QC4_TEMP = strfind(FLD.temp_adjusted_qc.data(n_prof,:),'4');
-					
+                    
                     FLD.temp_adjusted.data(n_prof,index_QC4_TEMP) = FLD.temp_adjusted.FillValue_ ;
                     FLD.temp_adjusted_error.data(n_prof,index_QC4_TEMP) = FLD.temp_adjusted_error.FillValue_ ;
-					
-					% Check for TEMP_ADJUSTED_QC='9'-> make sure TEMP_ADJUSTED and TEMP_ADJUSTED_ERROR are fill_value
+                    
+                    % Check for TEMP_ADJUSTED_QC='9'-> make sure TEMP_ADJUSTED and TEMP_ADJUSTED_ERROR are fill_value
                     FLD.temp_adjusted.data(n_prof,index_QC9_TEMP) = FLD.temp_adjusted.FillValue_ ;
                     FLD.temp_adjusted_error.data(n_prof,index_QC9_TEMP) = FLD.temp_adjusted_error.FillValue_ ;
-					
+                    
                     input_temp = FL.temp.data(n_prof,:);
-
+                    
                     if isfield(s,'force')==1&&strcmp(s.force,'adjusted')
                         input_temp = FL.temp_adjusted.data(n_prof,:);
                     end
@@ -487,13 +498,13 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         input_psal = sw_salt(cndr,FL.temp.data(n_prof,:),FL.pres_adjusted.data(n_prof,:));
                     end
                     
-      
+                    
                     if isfield(s,'force')==1&&strcmp(s.force,'adjusted')
                         input_psal = FL.psal_adjusted.data(n_prof,:);
                         testi = libargo.check_isfillval_prof(FL,'psal_adjusted')
                         %if numel(input_psal)==sum(isnan(input_psal))
                         if numel(input_psal)==sum(isnan(input_psal))& numel(FL.psal.data(n_prof,:))~=sum(isnan(FL.psal.data(n_prof,:))) % change 25/05/2020
-                           error('You forced the program to load PARAM_ADJUSTED, but the PSAL_ADJUSTED variable is empty!!!')
+                            error('You forced the program to load PARAM_ADJUSTED, but the PSAL_ADJUSTED variable is empty!!!')
                         end
                     end
                     
@@ -538,7 +549,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             
                             psal_adjusted_qc = FL.psal_qc.data(n_prof,:);
                             if isfield(s,'force')==1&&strcmp(s.force,'adjusted')
-                               psal_adjusted_qc = FL.psal_adjusted_qc.data(n_prof,:);
+                                psal_adjusted_qc = FL.psal_adjusted_qc.data(n_prof,:);
                             end
                             
                         case {'LAUNCH_OFFSET'} % launch offset
@@ -549,7 +560,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             
                             psal_adjusted_qc = FL.psal_qc.data(n_prof,:);
                             if isfield(s,'force')==1&&strcmp(s.force,'adjusted')
-                               psal_adjusted_qc = FL.psal_adjusted_qc.data(n_prof,:);
+                                psal_adjusted_qc = FL.psal_adjusted_qc.data(n_prof,:);
                             end
                             
                             
@@ -562,52 +573,53 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             psal_adjusted_qc = FL.psal_qc.data(n_prof,:);
                             
                             if isfield(s,'force')==1&&strcmp(s.force,'adjusted')
-                               psal_adjusted_qc = FL.psal_adjusted_qc.data(n_prof,:);
+                                psal_adjusted_qc = FL.psal_adjusted_qc.data(n_prof,:);
                             end
                             
                             % if flag '9' in PRES_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC
-                             % psal_adjusted_qc(index_QC9_PRES) = '4';                      % % modif 18/06/2018
+                            % psal_adjusted_qc(index_QC9_PRES) = '4';                      % % modif 18/06/2018
                             
                     end
                     %keyboard
                     
-                   % set PSAL_ADJUSTED_QC
-                   %--------------
-					 not_fillval_psal = (FL.psal.data(n_prof,:)~=FL.psal.FillValue_); % check if PSAL values are blank or missing
-
-					% In case PRES_ADJUSTED or TEMP_ADJUSTED are fillvalue, computation (ow or  PSAL adjusted for pres corrections) will result in  psal_adjusted=NaN.
-					% If psal_adjusted is NaN  put PSAL_ADJUSTED_QC to 4 )% modif 21/04/2018
+                    % set PSAL_ADJUSTED_QC
+                    %--------------
+                    not_fillval_psal = (FL.psal.data(n_prof,:)~=FL.psal.FillValue_); % check if PSAL values are blank or missing
+                    
+                    % In case PRES_ADJUSTED or TEMP_ADJUSTED are fillvalue, computation (ow or  PSAL adjusted for pres corrections) will result in  psal_adjusted=NaN.
+                    % If psal_adjusted is NaN  put PSAL_ADJUSTED_QC to 4 )% modif 21/04/2018
                     isfill_PSAL = find(isnan(psal_adjusted)&not_fillval_psal);
-					psal_adjusted_qc(isfill_PSAL) = '4';
+                    psal_adjusted_qc(isfill_PSAL) = '4';
                     isnan_PSAL = find(isnan(psal_adjusted));
-					psal_adjusted(isnan_PSAL) = FL.psal.FillValue_;
-					
+                    psal_adjusted(isnan_PSAL) = FL.psal.FillValue_;
+                    
                     %if flag '4' in PRES_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC
                     psal_adjusted_qc(index_QC4_PRES) = '4';
-					% if flag '4' in TEMP_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC % modif 21/04/2018
+                    % if flag '4' in TEMP_ADJUSTED_QC then flag '4' in PSAL_ADJUSTED_QC % modif 21/04/2018
                     psal_adjusted_qc(index_QC4_TEMP) = '4';
-					 
-                   
-					% if PSAL_QC==' ',keep blank values as in PSAL
-					index_blanck_PSAL = strfind(FL.psal_qc.data(n_prof,:),' '); % modif 21/04/2018
-					psal_adjusted_qc(index_blanck_PSAL )= ' ';
-				   	psal_adjusted(index_blanck_PSAL) = FL.psal.FillValue_;
-
-				   % if PSAL_QC==9,keep missing values as in PSAL
+                    
+                    
+                    % if PSAL_QC==' ',keep blank values as in PSAL
+                    index_blanck_PSAL = strfind(FL.psal_qc.data(n_prof,:),' '); % modif 21/04/2018
+                    psal_adjusted_qc(index_blanck_PSAL )= ' ';
+                    psal_adjusted(index_blanck_PSAL) = FL.psal.FillValue_;
+                    
+                    % if PSAL_QC==9,keep missing values as in PSAL
                     index_QC9_PSAL = strfind(FL.psal_qc.data(n_prof,:),'9'); % modif 21/04/2018
-					psal_adjusted_qc(index_QC9_PSAL )= '9';
-					psal_adjusted(index_QC9_PSAL) = FL.psal.FillValue_;
-					
-				
-
-					
+                    psal_adjusted_qc(index_QC9_PSAL )= '9';
+                    psal_adjusted(index_QC9_PSAL) = FL.psal.FillValue_;
+                    
+                    
+                    
+                    
                     % if PSAL_QC==2, PSAL_QC_ADJUSTED==1
                     psal_adjusted_qc = strrep(psal_adjusted_qc,'2','1');
                     
                     % if PSAL_QC==3, PSAL_QC_ADJUSTED==1 (except for deep arvor qc==3 -> qc=2 for depth >2000m)
                     %keyboard
                     if ismember(inst_type,{'838'}) % deep ARVOR
-                    psal_adjusted_qc(FL.pres.data(n_prof,:)>2000&psal_adjusted_qc=='3')='2'; % for deep arvor(ajout du 27/10/2016 pour les DEEP)
+                       %psal_adjusted_qc(FL.pres.data(n_prof,:)>2000&psal_adjusted_qc=='3')='2'; % for deep arvor(ajout du 27/10/2016 pour les DEEP)
+                        psal_adjusted_qc(FL.pres.data(n_prof,:)>2000&psal_adjusted_qc=='3')='1';% Modif du 27/04/2021
                     end
                     psal_adjusted_qc = strrep(psal_adjusted_qc,'3','1');
                     
@@ -616,7 +628,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     psal_adjusted_qc = strrep(psal_adjusted_qc,'1',CYC_PSAL_ADJ_QC);
                     % for deep Arvor
                     if ismember(inst_type,{'838'})&isempty(strfind(CYC_PSAL_ADJ_QC,'1'))
-                    psal_adjusted_qc = strrep(psal_adjusted_qc,'2',CYC_PSAL_ADJ_QC);
+                        psal_adjusted_qc = strrep(psal_adjusted_qc,'2',CYC_PSAL_ADJ_QC);
                     end
                     
                     %find PSAL_QC==4 and set PSAL_ADJSUTED and PSAL_ADJUSTED_ERROR to FillValue)
@@ -624,14 +636,17 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     
                     psal_adjusted (is_qc4) = FLD.psal_adjusted.FillValue_;
                     psal_adjusted_error (is_qc4) = FLD.psal_adjusted_error.FillValue_;
-                     
+                    
+                    % make sure PSAL_QC is also QC4 if PSAL_ADJUSTED_QC is  QC4   % add 08/07/2021
+                    FLD.psal_qc.data(n_prof,is_qc4)='4';
+                    
                     %find PSAL_QC==9 and set PSAL_ADJSUTED and PSAL_ADJUSTED_ERROR to FillValue)
                     is_qc9 = strfind( psal_adjusted_qc, '9');
                     
                     psal_adjusted (is_qc9) = FLD.psal_adjusted.FillValue_;
                     psal_adjusted_error (is_qc9) = FLD.psal_adjusted_error.FillValue_;
-					
-					
+                    
+                    
                     % Check if adjustement > 0.05PSU
                     is_sup_005 = find((abs(psal_adjusted-FL.psal.data(n_prof,:))>0.05) & psal_adjusted~=FLD.psal_adjusted.FillValue_);
                     
@@ -652,7 +667,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         
                     else % adjsutment is <=0.05
                         
-                        if str2num(CYC_PSAL_ADJ_QC)==2 % BUT  the PI has decided to set PSAL_ADJUSED_QC==2 
+                        if str2num(CYC_PSAL_ADJ_QC)==2 % BUT  the PI has decided to set PSAL_ADJUSED_QC==2
                             disp('Confidence in the PSAL adjustement is low,QC is 2 and error is 0.016PSU)')
                             fprintf (fic,'%s \n', ['       :Confidence in the PSAL adjustement is low, QC is 2 and error is 0.016PSU)']);
                             psal_adjusted_qc = strrep(psal_adjusted_qc,'1','2');
@@ -687,60 +702,93 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     error('One of the field pres, psal or temp is not found in the netcdf file')
                 end
                 
-                %===============CNDC------CNDC field--------------
+                               %===============CNDC------CNDC field--------------
                 
                 
                 if isfield(FLD,'cndc')
                     
                     if ~isfield(FLD,'cndc_adjusted') % remplit les structures CNDC_ADJUSTED
-                        FLD.cndc_adjusted = FLD.cndc; FLD.cndc_adjusted.name='CNDC_ADJUSTED';
-                        
-                        FLD.cndc_adjusted_qc = FLD.cndc_qc; FLD.cndc_adjusted_qc.name='CNDC_ADJUSTED_QC';
-                        FLD.cndc_adjusted_error = FLD.cndc; FLD.cndc_adjusted_error.name='CNDC_ADJUSTED_ERROR';
+                         FLD.cndc_adjusted = FLD.cndc; FLD.cndc_adjusted.name='CNDC_ADJUSTED';
+                        % les valeurs pour les secondary profiles sont remplies
+                        % par des fillvalues
+                        FLD.cndc_adjusted.data(~is_primary,:)= repmat(FLD.cndc_adjusted.FillValue_,sum(~is_primary),size(FLD.cndc_adjusted.data,2));
+                        FLD.cndc_adjusted_qc = FLD.psal_qc; FLD.cndc_adjusted_qc.name='CNDC_ADJUSTED_QC';
+                        FLD.cndc_adjusted_qc.data(~is_primary,:)= repmat(FLD.cndc_adjusted_qc.FillValue_,sum(~is_primary),size(FLD.cndc_adjusted_qc.data,2));
+                        FLD.cndc_adjusted_error = FLD.psal; FLD.cndc_adjusted_error.name='CNDC_ADJUSTED_ERROR';
+                        FLD.cndc_adjusted_error.data = repmat(FLD.cndc_adjusted_error.FillValue_,size(FLD.cndc_adjusted_error.data,1),size(FLD.cndc_adjusted_error.data,2));
                         FLD.cndc_adjusted_error =rmfield(FLD.cndc_adjusted_error,{'valid_min','valid_max'});
                     end
-                    test=check_isfillval_prof(FLD,'cndc');
+                    test=libargo.check_isfillval_prof(FLD,'cndc');
                     if test.cndc==0;
                         inst_type = strtrim(FLD.wmo_inst_type.data(n_prof,:));
                         %if ismember(inst_type,{'841','843','844','846','851','853','856','860','831','838'}) % SBE
-                            the_error = 0.005; % mS/cm
+                        the_error = 0.01; % mS/cm
                         %elseif ismember (inst_type,{'842','847','852','857','861'}) % FSI
-                        if ismember (inst_type,{'842','847','852','857','861'}) % FSI   
+                        if ismember (inst_type,{'842','847','852','857','861'}) % FSI
                             the_error = 0.01; % mS/cm
-                       % else
-                        %    disp('Unknown WMO_INST_TYPE')
-                        %    the_error =  0.01; %mS/cm
+                            % else
+                            %    disp('Unknown WMO_INST_TYPE')
+                            %    the_error =  0.01; %mS/cm
                         end
                         
                         % remplit le champs CNDC adjusted de façon cohérente avec psal_adjusted, temp_adjusted, et pres_adjusted
                         FLD = libargo.replace_fill_bynan(FLD);
                         
                         if ~strcmp(strtrim(FLD.cndc.units),'mhos/m')
-                            error(['Make sure tha the unit of FLD.cndc :' FLD.cndc.units ' is consistent with the computation of cndc adjusted and error'])
+                            error(['Make sure that the unit of FLD.cndc :' FLD.cndc.units ' is consistent with the computation of cndc adjusted and error'])
                         end
-                        % ATTENTION unite des fonctions sw 10-3 mhos/cm = mS/cm / unites dans fichier netcdf mhos/m = 10-1 mS/cm!
                         
+                        % apply the correction
+                        %--------------------------------
+                        % ATTENTION unite des fonctions SW ou sonde 10-3 mhos/cm = mS/cm / unites dans fichier netcdf mhos/m = 10-1 mS/cm!
+                        % verification des unités de FLD.cndc.data dans
+                        % fichier netcdf
                         cndc = sw_c3515*sw_cndr( FLD.psal.data(n_prof,:),FLD.temp.data(n_prof,:),FLD.pres.data(n_prof,:)); % mS/cm
-                        cndc_adjusted = sw_c3515*sw_cndr( FLD.psal_adjusted.data(n_prof,:),FLD.temp_adjusted.data(n_prof,:),FLD.pres_adjusted.data(n_prof,:)); % mS/cm
-                        
-                        if ismember({thecorrection},{'NO'})
-                            FLD.cndc_adjusted.data(n_prof,:) = FLD.cndc.data(n_prof,:);
-                            
-                        else
-                            cndc_adjusted=cndc_adjusted/10; % 10-1 mS/cm => mhos/m
-                            cndc_adjusted (isnan(cndc_adjusted)) = FLD.cndc_adjusted.FillValue_;
-                            
-                            FLD.cndc_adjusted.data(n_prof,:) = cndc_adjusted; % mhos/m
-                            
+                        cndc=cndc./10; % mhos/m
+                        testunits=libargo.meanoutnan(FLD.cndc.data(n_prof,:)./cndc);
+                        % correct units
+                        if testunits>9.99&testunits<=10
+                           disp('Wrong units for CNDC in the netcdf file : correction=>/10')
+                           FLD.cndc.data=FLD.cndc.data./10;
+                        elseif testunits<=0.1&testunits>0.099
+                           disp('Wrong units for CNDC in the netcdf file : correction=>x10')
+                           FLD.cndc.data=FLD.cndc.data.*10;
                         end
+                        
+                        switch   thecorrection
+                            case {'NO'}; % considered as good and do not need adjustement in DM
+                                
+                                cndc_adjusted =  FLD.cndc.data(n_prof,:);
+                                
+   
+                            case {'LAUNCH_OFFSET'} % launch offset
+                                cndc_adjusted = sw_c3515*sw_cndr( FLD.psal_adjusted.data(n_prof,:),FLD.temp_adjusted.data(n_prof,:),FLD.pres_adjusted.data(n_prof,:)); % mS/cm
+                                cndc_adjusted=cndc_adjusted/10; % 10-1 mS/cm => mhos/m
+                                
+                                
+                            case {'OW'} % ow correction
+                                cndc_adjusted = C_FILE.pcond_factor(ind_cycle).*FLD.cndc.data(n_prof,:);
+                                 
+                        end
+                       
+                            
+                       cndc_adjusted (isnan(cndc_adjusted)) = FLD.cndc_adjusted.FillValue_;
+                            
+                       FLD.cndc_adjusted.data(n_prof,:) = cndc_adjusted; % mhos/m
+                            
                         
                         FLD.cndc_adjusted_qc.data(n_prof,:)  =  FLD.psal_adjusted_qc.data(n_prof,:); % same QC as PSAL_ADJUSTED
+                         isblank= FLD.psal_adjusted_qc.data=='9';
+                         isfill = isnan(FLD.cndc_adjusted.data);
+                         FLD.cndc_adjusted_qc.data(~isfill&isblank)='4';
+                        %FLD.cndc_qc.data(n_prof,:)  =
+                        %FLD.psal_qc.data(n_prof,:); % same QC as PSAL
                         index_QC4 = strfind(FLD.cndc_adjusted_qc.data(n_prof,:),'4');
                         FLD.cndc_adjusted.data(n_prof,index_QC4) = NaN;
                         
-                        cal_COND_err =  C_FILE.pcond_factor_err(ind_cycle).*cndc; % mS/cm
+                        cal_COND_err =  C_FILE.pcond_factor_err(ind_cycle).*FLD.cndc.data(n_prof,:); % mhos/m
                         
-                        FLD.cndc_adjusted_error.data(n_prof,:) = max(the_error/10,cal_COND_err/10); % mhos/m
+                        FLD.cndc_adjusted_error.data(n_prof,:) = max(the_error/10,cal_COND_err); % mhos/m
                         
                         FLD.cndc_adjusted_error.data(n_prof,index_QC4) = NaN;
                         
@@ -748,6 +796,11 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     end
                     
                 end
+                
+                
+                
+                
+                
                 
                 %==============|PROFILE_****_QC|--------------------------
                 
@@ -769,37 +822,37 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     n_calib= DIMD.n_calib.dimlength+1;
                     
                     if  DIMD.n_calib.dimlength==1 % test if the field scientific_calib_comment is fillvalue
-                    testfill =FLD.scientific_calib_comment.data(:,DIMD.n_calib.dimlength,:,:)==FLD.scientific_calib_comment.FillValue_;
-                    if libargo.sumel(testfill)==numel(testfill) % parameter est a fillvalue
-                       n_calib= DIMD.n_calib.dimlength
-                    end
+                        testfill =FLD.scientific_calib_comment.data(:,DIMD.n_calib.dimlength,:,:)==FLD.scientific_calib_comment.FillValue_;
+                        if libargo.sumel(testfill)==numel(testfill) % parameter est a fillvalue
+                            n_calib= DIMD.n_calib.dimlength
+                        end
                     end
                     display(n_calib)
                     FLD.parameter.data(:,n_calib,:,:) = FLD.station_parameters.data;
-					
-					% initialize the calib section with fillvalues. % add 25/05/2020
-					%keyboard
-					thesize=size(FLD.scientific_calib_equation.data);
-					for iprof=1:thesize(1)
-						for iparam=1:thesize(3)
-							FLD.scientific_calib_equation.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_equation.FillValue_;
-							FLD.scientific_calib_coefficient.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_coefficient.FillValue_;
-							FLD.scientific_calib_comment.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_comment.FillValue_;
-								if format_version<2.3
-									FLD.calibration_date.data(iprof,n_calib,iparam,:)=FLD.calibration_date.FillValue_;
-								else
-									FLD.scientific_calib_date.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_date.FillValue_;
-								end
-						end
-					end
+                    
+                    % initialize the calib section with fillvalues. % add 25/05/2020
+                    %keyboard
+                    thesize=size(FLD.scientific_calib_equation.data);
+                    for iprof=1:thesize(1)
+                        for iparam=1:thesize(3)
+                            FLD.scientific_calib_equation.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_equation.FillValue_;
+                            FLD.scientific_calib_coefficient.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_coefficient.FillValue_;
+                            FLD.scientific_calib_comment.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_comment.FillValue_;
+                            if format_version<2.3
+                                FLD.calibration_date.data(iprof,n_calib,iparam,:)=FLD.calibration_date.FillValue_;
+                            else
+                                FLD.scientific_calib_date.data(iprof,n_calib,iparam,:)=FLD.scientific_calib_date.FillValue_;
+                            end
+                        end
+                    end
                 end
                 
                 
-%                  % test if the field "parameter" is filled or not
-%                  testfill = FLD.parameter.data(:,n_calib,:,:)==FLD.parameter.FillValue_;
-%                  if libargo.sumel(testfill)==numel(testfill) % parameter est a fillvalue
-%                      FLD.parameter.data(:,n_calib,:,:) = FLD.station_parameters.data;
-%                  end
+                %                  % test if the field "parameter" is filled or not
+                %                  testfill = FLD.parameter.data(:,n_calib,:,:)==FLD.parameter.FillValue_;
+                %                  if libargo.sumel(testfill)==numel(testfill) % parameter est a fillvalue
+                %                      FLD.parameter.data(:,n_calib,:,:) = FLD.station_parameters.data;
+                %                  end
                 
                 
                 
@@ -811,7 +864,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                 ind_pres = ismember(cellstr(theparameters),'PRES');
                 % find in pressure equation if surface pressure has been used to calibrate pressure
                 %presiscalib = ~isempty(strfind(squeeze(FL.scientific_calib_equation.data(n_prof,n_calib,ind_pres,:))','-'));
-				presiscalib = ~isempty(strfind(squeeze(FL.scientific_calib_equation.data(n_prof,1,ind_pres,:))','-')); % change 07/05/2020
+                presiscalib = ~isempty(strfind(squeeze(FL.scientific_calib_equation.data(n_prof,1,ind_pres,:))','-')); % change 07/05/2020
                 
                 switch   thecorrection
                     case {'NO'}; % considered as good and need no adjustement in DM
@@ -824,11 +877,11 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             equation = strrep(equation,'PSAL ', 'PSAL (re-calculated using PRES_ADJUSTED)');
                         end
                         if s.THERM==1&&s.ADD_NCALIB==0
-                           equation=[equation s.CTM_equation];
+                            equation=[equation s.CTM_equation];
                         end
                         
                         if str2num(CYC_PSAL_ADJ_QC)==4
-                        equation = 'none'; % BAD
+                            equation = 'none'; % BAD
                         end
                         
                         l_eq = length(equation);
@@ -838,11 +891,11 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         
                         coeff = 'none';
                         if s.THERM==1&&s.ADD_NCALIB==0
-                           coeff=[ s.CTM_coefficient];
+                            coeff=[ s.CTM_coefficient];
                         end
                         
                         if str2num(CYC_PSAL_ADJ_QC)==4
-                        coeff = 'none'; % BAD
+                            coeff = 'none'; % BAD
                         end
                         
                         l_co = length(coeff);
@@ -851,7 +904,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         
                         comment =  [s.CORR_PSAL_comment.NO  s.ERROR_PSAL_comment.here s.METHOD  s.REPPORT];
                         if str2num(CYC_PSAL_ADJ_QC)==4
-                        comment = ['Bad data; not adjustable. ' s.METHOD  s.REPPORT]; % BAD
+                            comment = ['Bad data; not adjustable. ' s.METHOD  s.REPPORT]; % BAD
                         end
                         
                         CHECK.psal.comment{i}=comment;
@@ -875,13 +928,13 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             equation = strrep(equation,'PSAL ', 'PSAL (re-calculated by using PRES_ADJUSTED)');
                         end
                         if s.THERM==1&&s.ADD_NCALIB==0
-                           equation=[equation s.CTM_equation];
+                            equation=[equation s.CTM_equation];
                         end
                         
                         equation = [equation ' + launch_offset'];
                         
                         if str2num(CYC_PSAL_ADJ_QC)==4
-                        equation = 'none'; % BAD
+                            equation = 'none'; % BAD
                         end
                         
                         l_eq = length(equation);
@@ -892,10 +945,10 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         
                         coefficient = ['launch_offset = ' num2str(s.LAUNCH_OFFSET)];
                         if s.THERM==1&&s.ADD_NCALIB==0
-                           coefficient=[coefficient '. ' s.CTM_coefficient];
+                            coefficient=[coefficient '. ' s.CTM_coefficient];
                         end
                         if str2num(CYC_PSAL_ADJ_QC)==4
-                        coefficient = 'none'; % BAD
+                            coefficient = 'none'; % BAD
                         end
                         l_coe = length(coefficient);
                         
@@ -904,7 +957,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         
                         comment = [s.CORR_PSAL_comment.LAUNCH_OFFSET s.ERROR_PSAL_comment.here   s.METHOD  s.REPPORT];
                         if str2num(CYC_PSAL_ADJ_QC)==4
-                        comment = ['Bad data; not adjustable. ' s.METHOD  s.REPPORT]; % BAD
+                            comment = ['Bad data; not adjustable. ' s.METHOD  s.REPPORT]; % BAD
                         end
                         CHECK.psal.comment{i}=comment;
                         l_co = length(comment);
@@ -928,12 +981,12 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         end
                         
                         if s.THERM==1&&s.ADD_NCALIB==0
-                           equation=[equation s.CTM_equation];
+                            equation=[equation s.CTM_equation];
                         end
                         equation=[equation ' + Delta_S, where Delta_S is calculated from a potential conductivity (ref to 0 dbar) multiplicative adjustment term r'];
-
+                        
                         if str2num(CYC_PSAL_ADJ_QC)==4
-                        equation = 'none'; % BAD
+                            equation = 'none'; % BAD
                         end
                         
                         
@@ -958,10 +1011,10 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         coefficient = ['r= ' num2str(C_FILE.pcond_factor(ind_cycle)) ' (+/- ' num2str(libargo.sd_round(C_FILE.pcond_factor_err(ind_cycle),1)) ') , vertically averaged dS =' num2str(correction) ' (+/- ' num2str(therror) ')' ];
                         
                         if s.THERM==1&&s.ADD_NCALIB==0
-                           coefficient=[coefficient '. ' s.CTM_coefficient];
+                            coefficient=[coefficient '. ' s.CTM_coefficient];
                         end
                         if str2num(CYC_PSAL_ADJ_QC)==4
-                        coefficient = 'none'; % BAD
+                            coefficient = 'none'; % BAD
                         end
                         l_coe = length(coefficient);
                         
@@ -970,7 +1023,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         
                         comment=[s.CORR_PSAL_comment.OW s.ERROR_PSAL_comment.here  s.METHOD  s.REPPORT];
                         if str2num(CYC_PSAL_ADJ_QC)==4
-                        comment = ['Bad data; not adjustable. ' s.METHOD  s.REPPORT]; % BAD
+                            comment = ['Bad data; not adjustable. ' s.METHOD  s.REPPORT]; % BAD
                         end
                         CHECK.psal.comment{i}=comment;
                         
@@ -1011,12 +1064,12 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                         
                         %keyboard
                         if nbelement==isfillval
-                        disp('WARNING: No Scientific calibration comment for PRES')
-
-                        if INPUT_PRESAD==10
-                            NINPUT_PRESAD=0;
-                            disp('-> PRES_ADJUSTED = PRES. Calibration comments will be filled')
-                        end
+                            disp('WARNING: No Scientific calibration comment for PRES')
+                            
+                            if INPUT_PRESAD==10
+                                NINPUT_PRESAD=0;
+                                disp('-> PRES_ADJUSTED = PRES. Calibration comments will be filled')
+                            end
                         end
                     end
                     
@@ -1120,9 +1173,14 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     FLD.scientific_calib_equation.data(n_prof,n_calib,ind_pres,:) = FLD.scientific_calib_equation.FillValue_;
                     FLD.scientific_calib_equation.data(n_prof,n_calib,ind_pres,1:l_thestr) = thestr;
                     FLD.scientific_calib_coefficient.data(n_prof,n_calib,ind_pres,:) = FLD.scientific_calib_coefficient.FillValue_;
-                    FLD.scientific_calib_coefficient.data(n_prof,n_calib,ind_pres,1:l_thestr) = thestr;   
+                    FLD.scientific_calib_coefficient.data(n_prof,n_calib,ind_pres,1:l_thestr) = thestr;
                     FLD.scientific_calib_comment.data(n_prof,n_calib,ind_pres,:) = FLD.scientific_calib_comment.FillValue_;
                     FLD.scientific_calib_comment.data(n_prof,n_calib,ind_pres,1:l_thestr) = thestr;
+                    if format_version<2.3
+                        FLD.calibration_date.data(n_prof,n_calib,ind_pres,:)=thedate;
+                    else
+                        FLD.scientific_calib_date.data(n_prof,n_calib,ind_pres,:)=thedate;
+                    end
                 end
                 CHECK.pres.comment{i} = squeeze(FLD.scientific_calib_comment.data(n_prof,n_calib,ind_pres,:))';
                 
@@ -1147,6 +1205,10 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     comment = s.CORR_TEMP_comment;
                     %CHECK.temp.comment{i}=comment;
                     
+                   if strcmp(FLD.profile_temp_qc.data(n_prof),'F')  % if TEMP was QCed bad for all the profile
+                       comment = ['Bad data; not adjustable. ' ]; % BAD
+                   end
+                    
                     maxl_co = DIM.(lower(FLD.scientific_calib_comment.dim{4})).dimlength;
                     
                     l_co = length(comment);
@@ -1163,7 +1225,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     FLD.scientific_calib_equation.data(n_prof,n_calib,ind_temp,:) = FLD.scientific_calib_equation.FillValue_;
                     FLD.scientific_calib_equation.data(n_prof,n_calib,ind_temp,1:l_thestr) = thestr;
                     FLD.scientific_calib_coefficient.data(n_prof,n_calib,ind_temp,:) = FLD.scientific_calib_coefficient.FillValue_;
-                    FLD.scientific_calib_coefficient.data(n_prof,n_calib,ind_temp,1:l_thestr) = thestr;   
+                    FLD.scientific_calib_coefficient.data(n_prof,n_calib,ind_temp,1:l_thestr) = thestr;
                     FLD.scientific_calib_comment.data(n_prof,n_calib,ind_temp,:) = FLD.scientific_calib_comment.FillValue_;
                     FLD.scientific_calib_comment.data(n_prof,n_calib,ind_temp,1:l_thestr) = thestr;
                 end
@@ -1174,6 +1236,42 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     FLD.scientific_calib_date.data(n_prof,n_calib,ind_temp,:)=thedate;
                 end
                 
+                % fill scientific calibration  for  intermediate core
+                % parameters TEMP_STD TEMP_MED PSAL_STD PSAL_MED PRES_MED
+                % TEMP_CNDC NB_SAMPLE_CTD MTIME
+                % --------------------------
+                list_intermediate={'TEMP_STD' 'TEMP_MED' 'PSAL_STD' 'PSAL_MED' 'PRES_MED' 'TEMP_CNDC' 'NB_SAMPLE_CTD' 'MTIME'};
+                theparameters = strtrim(squeeze(FLD.parameter.data(n_prof,n_calib,:,:)));
+
+                for ilist_ic=1:length(list_intermediate)
+                
+                    ind_ic = find(ismember(cellstr(theparameters),list_intermediate{ilist_ic}));
+                    
+                    if isempty(ind_ic)==0
+                        eq='not applicable';
+                        l_co = length(eq);
+                        
+                        FLD.scientific_calib_equation.data(n_prof,n_calib,ind_ic,:) = FLD.scientific_calib_equation.FillValue_;
+                        FLD.scientific_calib_equation.data(n_prof,n_calib,ind_ic,1:l_co) = eq;
+                        
+                        coeff='not applicable';
+                        l_co = length(coeff);
+                        FLD.scientific_calib_coefficient.data(n_prof,n_calib,ind_ic,:) = FLD.scientific_calib_coefficient.FillValue_;
+                        FLD.scientific_calib_coefficient.data(n_prof,n_calib,ind_ic,1:l_co) = coeff;
+                        
+                        comment ='not applicable';;
+                        l_co = length(comment);
+                        FLD.scientific_calib_comment.data(n_prof,n_calib,ind_ic,:) = FLD.scientific_calib_comment.FillValue_;
+                        FLD.scientific_calib_comment.data(n_prof,n_calib,ind_ic,1:l_co) = comment;
+                        
+                        
+                        if format_version<2.3
+                            FLD.calibration_date.data(n_prof,n_calib,ind_ic,:)=thedate;
+                        else
+                            FLD.scientific_calib_date.data(n_prof,n_calib,ind_ic,:)=thedate;
+                        end
+                    end
+                end
                 
                 % fill scientific calibration for  CNDC
                 % --------------------------
@@ -1188,8 +1286,11 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             
                             eq=['CNDC_ADJUSTED = CNDC']; %modif 08/09/2016
                             %eq='none';
+                            if s.THERM==1&&s.ADD_NCALIB==0
+                            equation=[equation s.CTM_equation];
+                            end
                             if str2num(CYC_PSAL_ADJ_QC)==4
-                            equation = 'None'; % BAD
+                                equation = 'None'; % BAD
                             end
                             
                             l_co = length(eq);
@@ -1212,7 +1313,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             comment = [CORR_CNDC_comment ERROR_CNDC_comment  s.METHOD  '.' ];
                             
                             if str2num(CYC_PSAL_ADJ_QC)==4
-                            comment = 'Bad data; not adjustable'; % BAD
+                                comment = ['Bad data; not adjustable. ' s.METHOD  s.REPPORT]; % BAD
                             end
                             
                             CHECK.cndc.comment{i}=comment;
@@ -1224,6 +1325,9 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             if l_co > maxl_co
                                 error(['The comment ' comment ' is too long']);
                             end
+                            isblank= FLD.psal_qc.data=='9';
+                            isfill = FLD.cndc.data==FLD.cndc.FillValue_;
+                            FLD.cndc_qc.data(~isfill&isblank)='4';
                             
                             FLD.scientific_calib_comment.data(n_prof,n_calib,ind_cndc,:) = FLD.scientific_calib_comment.FillValue_;
                             FLD.scientific_calib_comment.data(n_prof,n_calib,ind_cndc,1:l_co) = comment;
@@ -1234,7 +1338,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             
                             equation = 'CNDC_ADJUSTED = sw_c3515*sw_cndr(PSAL_ADJUSTED,TEMP_ADJUSTED,PRES_ADJUSTED)';
                             if str2num(CYC_PSAL_ADJ_QC)==4
-                            equation = 'None'; % BAD
+                                equation = 'None'; % BAD
                             end
                             
                             l_eq = length(equation);
@@ -1252,7 +1356,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             
                             comment = [CORR_CNDC_comment ERROR_CNDC_comment s.METHOD '.' ];
                             if str2num(CYC_PSAL_ADJ_QC)==4
-                            comment = 'Bad data; not adjustable'; % BAD
+                                comment = 'Bad data; not adjustable'; % BAD
                             end
                             CHECK.cndc.comment{i}=comment;
                             
@@ -1264,6 +1368,9 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             if l_co > maxl_co
                                 error(['The comment ' comment ' is too long']);
                             end
+                            isblank= FLD.psal_qc.data=='9';
+                            isfill = FLD.cndc.data==FLD.cndc.FillValue_;
+                            FLD.cndc_qc.data(~isfill&isblank)='4';
                             
                             FLD.scientific_calib_comment.data(n_prof,n_calib,ind_cndc,:) = FLD.scientific_calib_comment.FillValue_;
                             FLD.scientific_calib_comment.data(n_prof,n_calib,ind_cndc,1:l_co) = comment;
@@ -1273,7 +1380,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             
                             equation = ['CNDC_ADJUSTED = sw_c3515*sw_cndr(PSAL_ADJUSTED,TEMP_ADJUSTED,PRES_ADJUSTED)'];
                             if str2num(CYC_PSAL_ADJ_QC)==4
-                            equation = 'None'; % BAD
+                                equation = 'None'; % BAD
                             end
                             l_eq = length(equation);
                             
@@ -1292,7 +1399,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                             
                             comment = [CORR_CNDC_comment ERROR_CNDC_comment s.METHOD '.' ];
                             if str2num(CYC_PSAL_ADJ_QC)==4
-                            comment = 'Bad data; not adjustable'; % BAD
+                                comment = 'Bad data; not adjustable'; % BAD
                             end
                             CHECK.cndc.comment{i}=comment;
                             
@@ -1304,6 +1411,10 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                                 error(['The comment ' comment ' is too long']);
                             end
                             
+                            isblank= FLD.psal_qc.data=='9';
+                            isfill = FLD.cndc.data==FLD.cndc.FillValue_;
+                            FLD.cndc_qc.data(~isfill&isblank)='4';
+
                             FLD.scientific_calib_comment.data(n_prof,n_calib,ind_cndc,:) = FLD.scientific_calib_comment.FillValue_;
                             FLD.scientific_calib_comment.data(n_prof,n_calib,ind_cndc,1:l_co) = comment;
                             
@@ -1317,7 +1428,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                     
                 end
                 
-        
+                
                 
                 DIMD.n_param.dimlength = size(FLD.scientific_calib_comment.data,3);
                 DIMD.n_calib.dimlength = size(FLD.scientific_calib_comment.data,2);
@@ -1371,10 +1482,10 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                 FLD.history_software.data(new_hist,n_prof,1:l_so)=soft;
                 
                 if length(s.OW_RELEASE)>4
-                 warning('OW VERSION is truncated to 4 characters in HISTORY_SOFTWARE_RELEASE')
-                soft_release=s.OW_RELEASE(1:4);
+                    warning('OW VERSION is truncated to 4 characters in HISTORY_SOFTWARE_RELEASE')
+                    soft_release=s.OW_RELEASE(1:4);
                 else
-                 soft_release=s.OW_RELEASE;
+                    soft_release=s.OW_RELEASE;
                 end
                 l_so_r=length(soft_release);
                 FLD.history_software_release.data(new_hist,n_prof,1:l_so_r)=soft_release;
@@ -1414,12 +1525,19 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                 
                 % verifie qu'il n'y ait pas de NaN, et sinon remplace par des
                 % fill_value
-               % keyboard
+                % keyboard
                 FLD = libargo.replace_nan_byfill(FLD);
                 
+                %==============|PROFILE_****_QC|--------------------------
+                
+                % compute again the profile_QC for each parameter
+                
+                FLD = libargo.check_profile_qc(FLD);
+                
+                
                 if isfield(C,'OPERATOR_NAME')&&isfield(C,'OPERATOR_ORCID_ID')&&isfield(C,'OPERATOR_INSTITUTION')
-                GlobattD.comment_dmqc_operator.att = ['PRIMARY | ' strtrim(C.OPERATOR_ORCID_ID) ' | ' strtrim(C.OPERATOR_NAME) ', ' strtrim(C.OPERATOR_INSTITUTION) ];
-                GlobattD.comment_dmqc_operator.name = 'comment_dmqc_operator';
+                    GlobattD.comment_dmqc_operator.att = ['PRIMARY | ' strtrim(C.OPERATOR_ORCID_ID) ' | ' strtrim(C.OPERATOR_NAME) ', ' strtrim(C.OPERATOR_INSTITUTION) ];
+                    GlobattD.comment_dmqc_operator.name = 'comment_dmqc_operator';
                 end
                 libargo.create_netcdf_allthefile(FLD,DIMD,[root_out file_out],GlobattD);
                 
@@ -1433,7 +1551,7 @@ for ifile=1:length(therep)  % WORK ON EACH FILE
                 %CHECK.n_cycle_for_plot: numero de cycle pour le plot de check: profil ascendant decale de 0.5 dans cas ou il y a un profil descendant et un profil ascendant pour un meme cycle
                 % cela permet de tracer les qc de tous les profils A et D.
                 
-				
+                
                 if direction=='A'
                     if i>ifirst && CHECK.n_cycle(i-1)==FLD.cycle_number.data(n_prof); % cyle D et cycle A pour un meme cycle
                         CHECK.n_cycle_for_plot(i) =double(FLD.cycle_number.data(n_prof))+0.5;
