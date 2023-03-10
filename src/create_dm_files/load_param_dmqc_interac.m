@@ -101,7 +101,7 @@ while iswc==2
                         switch iswc
                             case{'OK'}
                                 s.CORRECTION = {'NO';'OW';'NO'};
-                                s.APPLY_upto_CY = [str2num(answer{1}) str2num(answer{2}),max(C_FILE.PROFILE_NO)];
+                                s.APPLY_upto_CY = [str2num(answer{1})-1 str2num(answer{2}),max(C_FILE.PROFILE_NO)];
                                 stopasking=1;
                         end
                     end
