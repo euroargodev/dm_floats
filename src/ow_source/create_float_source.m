@@ -209,6 +209,8 @@ else
             Fi=libargo.replace_fill_bynan(FL);
             thepres=floor(Fi.pres.data/10);     % 23/08/2019 max one level every 10db (floor instead of round => less gaps)
            [up,ip]=unique(thepres,'legacy');    % 23/08/2019 'legacy': take the deepest level on the 10db layer
+            up2=up(~isnan(up));                 %02/07/2021   elimination des NaN
+            ip2=ip(~isnan(up));
             if length(up)< length(thepres)
             display(['Reduce vertical sampling - max 1 level every 10db -(' num2str(DIM.n_levels.dimlength) ' to ' num2str(length(ip)) ')'])
             end
