@@ -266,8 +266,12 @@ else
             ij=find(thediff~=0 & ~isnan(thediff));
             % compute conductivity from the salinity and raw pressure
             cndr = sw_cndr(SALINI(ij),TEMPINI(ij),PRESINI(ij));
-            PRESINI = PRESINI_ADJUSTED;
-            pres_qc  = FLm.pres_adjusted_qc.data';
+            
+            %PRESINI = PRESINI_ADJUSTED;   % [cc 04/12/2025
+            PRESINI(ij) = PRESINI_ADJUSTED(ij);
+            %pres_qc  = FLm.pres_adjusted_qc.data'; 
+            pres_adjusted_qc =FLm.pres_adjusted_qc.data';
+            pres_qc(ij)  =pres_adjusted_qc(ij);  % cc 04/12/2025]
             
             % recompute the salinity from conductivity and adjusted pressure
             sal = sw_salt(cndr,TEMPINI(ij),PRESINI(ij));
@@ -538,7 +542,7 @@ else
     
     %---------------------------------------------------------------
     % WRITE MAT FILE
-    
+   
     
     save(mat_filename,'DATES','LAT','LONG','PRES','TEMP','SAL','PTMP','PROFILE_NO')
 end
