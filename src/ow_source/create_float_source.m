@@ -136,8 +136,10 @@ else
     filenames={list.name};
     ischarcellB = strfind(filenames,'B');
     ischarcellM = strfind(filenames,'M');
-    if ~isempty(ischarcellB)||~isempty(ischarcellM) % remove B and M files
-        core_files = filenames(cellfun(@isempty,ischarcellB)&cellfun(@isempty,ischarcellM));
+    ischarcellS = strfind(filenames,'S'); %cc 19/05/26
+    if ~isempty(ischarcellB)||~isempty(ischarcellM) % remove B and M/S files
+        %core_files = filenames(cellfun(@isempty,ischarcellB)&cellfun(@isempty,ischarcellM));
+        core_files = filenames(cellfun(@isempty,ischarcellB)&cellfun(@isempty,ischarcellM)&cellfun(@isempty,ischarcellS)); %cc 19/05/26
     end
     
     % Do not take descending profiles
@@ -432,6 +434,7 @@ else
     
     % Exclude dummies
     I = find( SALINI  > 50  | SALINI  <   0 | ...
+        TEMPINI > 50  | TEMPINI < -10 | ...                  % cc 28/08/26
         PTMPINI > 50  | PTMPINI < -10 | ...
         PRESINI >6000 | PRESINI <   0);
     qc(I) = 0;
